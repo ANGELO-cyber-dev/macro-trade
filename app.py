@@ -1,4 +1,5 @@
 from flask import Flask, render_template
+import os
 import requests
 import yfinance as yf
 
@@ -6,7 +7,9 @@ app = Flask(__name__)
 
 @app.route('/')
 def index():
-    # 1. Fetch live Forex rates via Frankfurter API (100% reliable, zero-key)
+    finnhub_key = os.environ.get("FINNHUB_API_KEY", "Daetc89r01qqo7nu2ucgdaetc89r01qqo7nu2ud0")
+
+    # 1. Fetch live Forex rates via Frankfurter API
     eur_usd = "1.0850"
     gbp_usd = "1.2640"
     usd_jpy = "155.20"
@@ -46,19 +49,39 @@ def index():
     except Exception:
         btc_price = "Unavailable"
 
+    # 4. Fetch live Economic Calendar from Finnhub API
+    news_items = []
+    try:
+        cal_url = f"https://finnhub.io/api/v1/calendar/economic?token={finnhub_key}"
+        cal_resp = requests.get(cal_url, timeout=5).json()
+        economic_events = cal_resp.get("economicCalendar", [])[:6]
+        for event in economic_events:
+            news_items.append({
+                "time": f"{event.get('country', 'USD')} - {event.get('time', 'Scheduled')}",
+                "title": event.get('event', 'Macro Event'),
+                "impact": f"Impact: {event.get('impact', 'Normal')} | Forecast: {event.get('estimate', 'N/A')}"
+            })
+    except Exception:
+        pass
+
+    if not news_items:
+        news_items = [
+            {"time": "Global - Live", "title": "Syncing Economic Calendar Feed...", "impact": "Impact: Normal | Forecast: N/A"}
+        ]
+
     forex_pairs = [
-        {"symbol": "EUR/USD", "rate": eur_usd, "signal": "Live Frankfurter Stream"},
-        {"symbol": "GBP/USD", "rate": gbp_usd, "signal": "Live Frankfurter Stream"},
-        {"symbol": "USD/JPY", "rate": usd_jpy, "signal": "Live Frankfurter Stream"}
+        {"symbol": "EUR/USD", "rate": eur_usd, "signal": "Bullish Bias (ECB Hawkish / Fed Hold)"},
+        {"symbol": "GBP/USD", "rate": gbp_usd, "signal": "Neutral-Bullish (UK Growth Resilient)"},
+        {"symbol": "USD/JPY", "rate": usd_jpy, "signal": "Bearish USD (Yields Capped)"}
     ]
 
     commodity_pairs = [
-        {"symbol": "XAU/USD", "rate": gold_price, "signal": "Live Market Stream"},
-        {"symbol": "XAG/USD", "rate": silver_price, "signal": "Live Market Stream"}
+        {"symbol": "XAU/USD", "rate": gold_price, "signal": "Strong Bullish (Inflation Hedge)"},
+        {"symbol": "XAG/USD", "rate": silver_price, "signal": "Bullish (Industrial Demand)"}
     ]
 
     crypto_pairs = [
-        {"symbol": "BTC/USDT", "rate": btc_price, "signal": "Binance Live Stream"}
+        {"symbol": "BTC/USDT", "rate": btc_price, "signal": "Risk-On Liquidity Stream"}
     ]
 
     return render_template(
@@ -66,7 +89,9 @@ def index():
         forex_pairs=forex_pairs, 
         commodity_pairs=commodity_pairs, 
         crypto_pairs=crypto_pairs,
-        fred_yield="4.34%"
+        news_items=news_items,
+        fred_yield="4.34%",
+        policy_stance="Restrictive"
     )
 
 if __name__ == '__main__':
