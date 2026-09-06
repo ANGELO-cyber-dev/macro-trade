@@ -20,9 +20,7 @@
         .desc { font-size: 0.75rem; color: #6c757d; }
         .price-box { text-align: right; }
         .price { font-weight: bold; font-size: 0.95rem; }
-        .signal { font-size: 0.75rem; font-weight: 600; }
-        .signal.bullish { color: #198754; }
-        .signal.neutral { color: #fd7e14; }
+        .signal { font-size: 0.75rem; font-weight: 600; color: #198754; }
     </style>
 </head>
 <body>
@@ -39,7 +37,7 @@
     <div class="card">
         <strong>Drivers are confirming macro positioning</strong>
         <p style="font-size: 0.85rem; color: #555; margin: 8px 0;">Rate Policy Stance: Restrictive</p>
-        <p style="font-size: 0.85rem; color: #555; margin: 0;">Official 2Y Yield (FRED): 4.34%</p>
+        <p style="font-size: 0.85rem; color: #555; margin: 0;">Official 2Y Yield (FRED): <strong>{{ fred_yield }}</strong></p>
     </div>
 
     <div class="card">
@@ -55,11 +53,11 @@
             <div class="asset-row">
                 <div>
                     <div class="symbol">{{ pair.symbol }}</div>
-                    <div class="desc">Market Feed Asset</div>
+                    <div class="desc">Live Market Stream</div>
                 </div>
                 <div class="price-box">
                     <div class="price">{{ pair.rate }}</div>
-                    <div class="signal bullish">Active Feed</div>
+                    <div class="signal">{{ pair.signal }}</div>
                 </div>
             </div>
             {% else %}
