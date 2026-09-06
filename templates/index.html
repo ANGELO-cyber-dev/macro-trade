@@ -5,116 +5,239 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Macro Signal Dashboard</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f8f9fa; margin: 0; padding: 15px; color: #333; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f4f6f8; margin: 0; padding: 15px; color: #111; }
         .container { max-width: 600px; margin: auto; }
-        .header { font-weight: bold; font-size: 1.1rem; margin-bottom: 5px; }
-        .status { color: #2e7d32; font-size: 0.85rem; margin-bottom: 15px; }
-        .search-box { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 15px; font-size: 0.95rem; box-sizing: border-box; }
-        .card { background: #fff; padding: 15px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 15px; }
-        .tabs { display: flex; gap: 8px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 5px; }
-        .tab-btn { background: #f1f3f5; border: none; padding: 8px 14px; border-radius: 6px; font-weight: bold; font-size: 0.85rem; cursor: pointer; color: #495057; }
-        .tab-btn.active { background: #212529; color: #fff; }
-        .asset-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f3f5; }
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .header { font-weight: 800; font-size: 1.2rem; color: #111; }
+        .menu-btn { background: #0f172a; color: #fff; border: none; padding: 8px 12px; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 0.9rem; }
+        .status { color: #1b5e20; font-weight: 600; font-size: 0.85rem; margin-bottom: 15px; }
+        .search-box { width: 100%; padding: 14px; border: 1.5px solid #cbd5e1; border-radius: 8px; margin-bottom: 15px; font-size: 1rem; box-sizing: border-box; background: #fff; color: #111; }
+        .card { background: #fff; padding: 16px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 16px; border: 1px solid #e2e8f0; }
+        .tabs { display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 4px; }
+        .tab-btn { background: #e2e8f0; border: none; padding: 10px 16px; border-radius: 8px; font-weight: 700; font-size: 0.9rem; cursor: pointer; color: #334155; }
+        .tab-btn.active { background: #0f172a; color: #fff; }
+        .asset-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f1f5f9; }
         .asset-row:last-child { border-bottom: none; }
-        .symbol { font-weight: bold; font-size: 0.95rem; }
-        .subtext { font-size: 0.75rem; color: #6c757d; }
-        .price { font-weight: bold; text-align: right; font-size: 0.95rem; }
-        .signal { font-size: 0.75rem; text-align: right; color: #2e7d32; font-weight: bold; }
-        .asset-section { display: none; }
-        .asset-section.active { display: block; }
+        .symbol { font-weight: 700; font-size: 1rem; color: #0f172a; }
+        .subtext { font-size: 0.8rem; color: #475569; margin-top: 2px; }
+        .price { font-weight: 700; text-align: right; font-size: 1rem; color: #0f172a; }
+        .signal { font-size: 0.8rem; text-align: right; color: #15803d; font-weight: 700; margin-top: 2px; }
+        .asset-section, .tool-section { display: none; }
+        .asset-section.active, .tool-section.active { display: block; }
+        
+        /* Dropdown Menu Styles */
+        .menu-dropdown { display: none; position: absolute; top: 55px; left: 15px; background: #fff; border: 1px solid #cbd5e1; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 100; width: 200px; }
+        .menu-dropdown.show { display: block; }
+        .menu-item { padding: 12px 16px; font-weight: 600; font-size: 0.9rem; color: #0f172a; cursor: pointer; border-bottom: 1px solid #f1f5f9; }
+        .menu-item:hover { background: #f8fafc; }
+        .menu-item:last-child { border-bottom: none; }
+
+        /* Calculator Styles */
+        .calc-input { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; }
+        .calc-btn { background: #2563eb; color: #fff; border: none; padding: 10px; width: 100%; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        
+        /* News Item Styles */
+        .news-item { padding: 10px 0; border-bottom: 1px solid #f1f5f9; }
+        .news-item:last-child { border-bottom: none; }
+        .news-time { font-size: 0.75rem; color: #dc2626; font-weight: 700; }
+        .news-title { font-weight: 600; font-size: 0.9rem; color: #0f172a; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">MACRO SIGNAL</div>
+    <div class="container" style="position: relative;">
+        <div class="top-bar">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <button class="menu-btn" id="menuToggle">☰ Menu</button>
+                <div class="header">MACRO SIGNAL</div>
+            </div>
+        </div>
+
+        <!-- Top Left Dropdown Menu -->
+        <div class="menu-dropdown" id="menuDropdown">
+            <div class="menu-item" data-view="dashboard">Live Dashboard</div>
+            <div class="menu-item" data-view="calculator">Position Size Calculator</div>
+            <div class="menu-item" data-view="news">Fundamental News</div>
+        </div>
+
         <div class="status">● LIVE FEED ACTIVE</div>
 
-        <input type="text" class="search-box" placeholder="Search ticker...">
+        <!-- Dashboard View -->
+        <div id="dashboardView" class="tool-section active">
+            <input type="text" class="search-box" placeholder="Search ticker...">
 
-        <div class="card">
-            <div style="font-weight: bold; margin-bottom: 8px;">Drivers are confirming macro positioning</div>
-            <div style="font-size: 0.85rem; color: #495057;">Rate Policy Stance: Restrictive</div>
-            <div style="font-size: 0.85rem; color: #495057;">Official 2Y Yield (FRED): {{ fred_yield }}</div>
-        </div>
-
-        <div class="tabs">
-            <button class="tab-btn active" data-target="forex">FOREX</button>
-            <button class="tab-btn" data-target="commodities">COMMODITIES</button>
-            <button class="tab-btn" data-target="crypto">CRYPTO</button>
-        </div>
-
-        <div class="card">
-            <!-- Forex Section -->
-            <div id="forex" class="asset-section active">
-                {% for item in forex_pairs %}
-                <div class="asset-row">
-                    <div>
-                        <div class="symbol">{{ item.symbol }}</div>
-                        <div class="subtext">Live Market Stream</div>
-                    </div>
-                    <div>
-                        <div class="price">{{ item.rate }}</div>
-                        <div class="signal">{{ item.signal }}</div>
-                    </div>
-                </div>
-                {% endfor %}
+            <div class="card">
+                <div style="font-weight: 700; margin-bottom: 8px; color: #0f172a;">Drivers are confirming macro positioning</div>
+                <div style="font-size: 0.9rem; color: #334155; margin-bottom: 4px;">Rate Policy Stance: {{ policy_stance }}</div>
+                <div style="font-size: 0.9rem; color: #334155;">Official 2Y Yield (FRED): {{ fred_yield }}</div>
             </div>
 
-            <!-- Commodities Section -->
-            <div id="commodities" class="asset-section">
-                {% for item in commodity_pairs %}
-                <div class="asset-row">
-                    <div>
-                        <div class="symbol">{{ item.symbol }}</div>
-                        <div class="subtext">Live Market Stream</div>
-                    </div>
-                    <div>
-                        <div class="price">{{ item.rate }}</div>
-                        <div class="signal">{{ item.signal }}</div>
-                    </div>
-                </div>
-                {% endfor %}
+            <div class="tabs">
+                <button class="tab-btn active" data-target="forex">FOREX</button>
+                <button class="tab-btn" data-target="commodities">COMMODITIES</button>
+                <button class="tab-btn" data-target="crypto">CRYPTO</button>
             </div>
 
-            <!-- Crypto Section -->
-            <div id="crypto" class="asset-section">
-                {% for item in crypto_pairs %}
-                <div class="asset-row">
-                    <div>
-                        <div class="symbol">{{ item.symbol }}</div>
-                        <div class="subtext">Binance Stream</div>
+            <div class="card">
+                <!-- Forex Section -->
+                <div id="forex" class="asset-section active">
+                    {% for item in forex_pairs %}
+                    <div class="asset-row">
+                        <div>
+                            <div class="symbol">{{ item.symbol }}</div>
+                            <div class="subtext">Live Stream</div>
+                        </div>
+                        <div>
+                            <div class="price">{{ item.rate }}</div>
+                            <div class="signal">{{ item.signal }}</div>
+                        </div>
                     </div>
-                    <div>
-                        <div class="price">{{ item.rate }}</div>
-                        <div class="signal">{{ item.signal }}</div>
-                    </div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
+
+                <!-- Commodities Section -->
+                <div id="commodities" class="asset-section">
+                    {% for item in commodity_pairs %}
+                    <div class="asset-row">
+                        <div>
+                            <div class="symbol">{{ item.symbol }}</div>
+                            <div class="subtext">Live Stream</div>
+                        </div>
+                        <div>
+                            <div class="price">{{ item.rate }}</div>
+                            <div class="signal">{{ item.signal }}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Crypto Section -->
+                <div id="crypto" class="asset-section">
+                    {% for item in crypto_pairs %}
+                    <div class="asset-row">
+                        <div>
+                            <div class="symbol">{{ item.symbol }}</div>
+                            <div class="subtext">Binance Stream</div>
+                        </div>
+                        <div>
+                            <div class="price">{{ item.rate }}</div>
+                            <div class="signal">{{ item.signal }}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Position Size Calculator View -->
+        <div id="calculatorView" class="tool-section">
+            <div class="card">
+                <div style="font-weight: 700; margin-bottom: 12px; color: #0f172a;">Position Size Calculator</div>
+                <label style="font-size: 0.85rem; font-weight: 600;">Account Balance ($)</label>
+                <input type="number" id="accBalance" class="calc-input" value="10000">
+                
+                <label style="font-size: 0.85rem; font-weight: 600;">Risk Percentage (%)</label>
+                <input type="number" id="riskPct" class="calc-input" value="1">
+                
+                <label style="font-size: 0.85rem; font-weight: 600;">Stop Loss (Pips)</label>
+                <input type="number" id="stopPips" class="calc-input" value="30">
+                
+                <button class="calc-btn" onclick="calculateLotSize()">Calculate Size</button>
+                
+                <div id="calcResult" style="margin-top: 15px; font-weight: 700; color: #0f172a; text-align: center;"></div>
+            </div>
+        </div>
+
+        <!-- Fundamental News View -->
+        <div id="newsView" class="tool-section">
+            <div class="card">
+                <div style="font-weight: 700; margin-bottom: 12px; color: #0f172a;">Upcoming Fundamental News (Forex Factory Feed)</div>
+                <div class="news-item">
+                    <div class="news-time">USD - 1:30 PM</div>
+                    <div class="news-title">Non-Farm Employment Change (NFP)</div>
+                    <div style="font-size: 0.75rem; color: #475569;">Impact: High | Forecast: 175K</div>
+                </div>
+                <div class="news-item">
+                    <div class="news-time">EUR - 2:15 PM</div>
+                    <div class="news-title">ECB Interest Rate Decision</div>
+                    <div style="font-size: 0.75rem; color: #475569;">Impact: High | Forecast: 4.25%</div>
+                </div>
+                <div class="news-item">
+                    <div class="news-time">GBP - 7:00 AM</div>
+                    <div class="news-title">CPI y/y</div>
+                    <div style="font-size: 0.75rem; color: #475569;">Impact: Medium | Forecast: 2.2%</div>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const tabs = document.querySelectorAll('.tab-btn');
-            const sections = document.querySelectorAll('.asset-section');
+        // Menu Toggle
+        const menuToggle = document.getElementById('menuToggle');
+        const menuDropdown = document.getElementById('menuDropdown');
+        
+        menuToggle.addEventListener('click', function(e) {
+            e.stopPropagation();
+            menuDropdown.classList.toggle('show');
+        });
 
-            tabs.forEach(tab => {
-                tab.addEventListener('click', function() {
-                    tabs.forEach(t => t.classList.remove('active'));
-                    this.classList.add('active');
+        window.addEventListener('click', function() {
+            menuDropdown.classList.remove('show');
+        });
 
-                    const target = this.getAttribute('data-target');
-                    sections.forEach(sec => {
-                        if (sec.id === target) {
-                            sec.classList.add('active');
-                        } else {
-                            sec.classList.remove('active');
-                        }
-                    });
+        // View Switcher from Menu
+        const menuItems = document.querySelectorAll('.menu-item');
+        const toolSections = document.querySelectorAll('.tool-section');
+
+        menuItems.forEach(item => {
+            item.addEventListener('click', function() {
+                const view = this.getAttribute('data-view');
+                toolSections.forEach(sec => {
+                    sec.classList.remove('active');
+                });
+                if(view === 'dashboard') document.getElementById('dashboardView').classList.add('active');
+                if(view === 'calculator') document.getElementById('calculatorView').classList.add('active');
+                if(view === 'news') document.getElementById('newsView').classList.add('active');
+                menuDropdown.classList.remove('show');
+            });
+        });
+
+        // Tab Switcher for Dashboard Assets
+        const tabs = document.querySelectorAll('.tab-btn');
+        const assetSections = document.querySelectorAll('.asset-section');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                tabs.forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+
+                const target = this.getAttribute('data-target');
+                assetSections.forEach(sec => {
+                    if (sec.id === target) {
+                        sec.classList.add('active');
+                    } else {
+                        sec.classList.remove('active');
+                    }
                 });
             });
         });
+
+        // Position Size Calculation Logic
+        function calculateLotSize() {
+            const balance = parseFloat(document.getElementById('accBalance').value) || 0;
+            const risk = parseFloat(document.getElementById('riskPct').value) || 0;
+            const pips = parseFloat(document.getElementById('stopPips').value) || 0;
+
+            if (pips <= 0) {
+                document.getElementById('calcResult').innerText = "Stop loss must be greater than 0";
+                return;
+            }
+
+            const riskAmount = balance * (risk / 100);
+            // Standard standard lot value approximation ($10 per pip for major pairs)
+            const lotSize = riskAmount / (pips * 10);
+            
+            document.getElementById('calcResult').innerHTML = `Risk Amount: $${riskAmount.toFixed(2)}<br>Recommended Lot Size: ${lotSize.toFixed(2)} Lots`;
+        }
     </script>
 </body>
 </html>
