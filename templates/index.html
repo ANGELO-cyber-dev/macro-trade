@@ -238,6 +238,28 @@
             
             document.getElementById('calcResult').innerHTML = `Risk Amount: $${riskAmount.toFixed(2)}<br>Recommended Lot Size: ${lotSize.toFixed(2)} Lots`;
         }
+    
+    <script>
+        // Search Filter Logic
+        const searchBox = document.querySelector(".search-box");
+        if (searchBox) {
+            searchBox.addEventListener("input", function() {
+                const query = this.value.toLowerCase().trim();
+                const assetRows = document.querySelectorAll(".asset-row");
+                
+                assetRows.forEach(row => {
+                    const symbolText = row.querySelector(".symbol") ? row.querySelector(".symbol").innerText.toLowerCase() : "";
+                    const subtext = row.querySelector(".subtext") ? row.querySelector(".subtext").innerText.toLowerCase() : "";
+                    const signal = row.querySelector(".signal") ? row.querySelector(".signal").innerText.toLowerCase() : "";
+                    
+                    if (symbolText.includes(query) || subtext.includes(query) || signal.includes(query)) {
+                        row.style.display = "flex";
+                    } else {
+                        row.style.display = "none";
+                    }
+                });
+            });
+        }
     </script>
 </body>
 </html>
