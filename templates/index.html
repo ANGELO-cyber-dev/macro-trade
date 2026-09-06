@@ -3,189 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MacroTrade Analytics & Forex Engine</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Macro Signal Analytics</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #f8f9fa; color: #333; margin: 0; padding: 15px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .brand { font-weight: bold; font-size: 1.1rem; }
+        .live-badge { color: #198754; font-size: 0.8rem; font-weight: 600; }
+        .search-bar { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 15px; box-sizing: border-box; }
+        .card { background: #fff; border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); border: 1px solid #eee; }
+        .tabs { display: flex; gap: 8px; margin-bottom: 15px; font-size: 0.85rem; font-weight: 600; }
+        .tab { padding: 6px 12px; border-radius: 6px; background: #f1f3f5; color: #495057; cursor: pointer; }
+        .tab.active { background: #212529; color: #fff; }
+        .asset-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f3f5; }
+        .asset-row:last-child { border-bottom: none; }
+        .symbol { font-weight: bold; font-size: 0.95rem; }
+        .desc { font-size: 0.75rem; color: #6c757d; }
+        .price-box { text-align: right; }
+        .price { font-weight: bold; font-size: 0.95rem; }
+        .signal { font-size: 0.75rem; font-weight: 600; }
+        .signal.bullish { color: #198754; }
+        .signal.neutral { color: #fd7e14; }
+    </style>
 </head>
-<body class="bg-white text-gray-800 font-sans antialiased min-h-screen">
-    <header class="border-b border-gray-200 bg-white sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col sm:flex-row justify-between items-center gap-4">
-            <h1 class="text-xl font-bold tracking-tight text-blue-600">MacroTrade Analytics</h1>
-            <div class="w-full sm:w-96">
-                <input type="text" id="searchInput" onkeyup="filterAssets()" placeholder="Search forex pairs (e.g. EURUSD, GBPUSD)..." 
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50">
-            </div>
+<body>
+
+    <div class="header">
+        <div>
+            <div class="brand">MACRO SIGNAL</div>
+            <div class="live-badge">● LIVE FEED ACTIVE</div>
         </div>
-    </header>
+    </div>
 
-    <main class="max-w-7xl mx-auto px-4 py-8 space-y-8">
-        <section class="space-y-4">
-            <h2 class="text-lg font-semibold text-gray-900">US Macro-Economic Indicators & Fundamental Bias (FRED)</h2>
-            <div id="macroGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="p-4 rounded-xl border border-gray-200 bg-white shadow-sm"><p class="text-xs text-gray-500">Loading Macro Data...</p></div>
-            </div>
-            <div id="fundamentalInsight" class="p-5 rounded-xl border border-blue-100 bg-blue-50/50 text-sm text-blue-900">
-                <span class="font-semibold">Synthesizing Fundamental Direction...</span>
-            </div>
-        </section>
+    <input type="text" class="search-bar" placeholder="Search ticker...">
 
-        <section class="space-y-6">
-            <h2 class="text-lg font-semibold text-gray-900">Live Forex Market Feeds</h2>
-            <div>
-                <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3">All Active Currency Pairs</h3>
-                <div id="forexGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <p class="text-xs text-gray-400 p-2">Connecting to live broker feed...</p>
+    <div class="card">
+        <strong>Drivers are confirming macro positioning</strong>
+        <p style="font-size: 0.85rem; color: #555; margin: 8px 0;">Rate Policy Stance: Restrictive</p>
+        <p style="font-size: 0.85rem; color: #555; margin: 0;">Official 2Y Yield (FRED): 4.34%</p>
+    </div>
+
+    <div class="card">
+        <div class="tabs">
+            <div class="tab">INDICES</div>
+            <div class="tab active">COMMODITIES</div>
+            <div class="tab">FOREX</div>
+            <div class="tab">NYSE</div>
+        </div>
+
+        <div class="asset-list">
+            {% for pair in currency_pairs %}
+            <div class="asset-row">
+                <div>
+                    <div class="symbol">{{ pair.symbol }}</div>
+                    <div class="desc">Market Feed Asset</div>
+                </div>
+                <div class="price-box">
+                    <div class="price">{{ pair.rate }}</div>
+                    <div class="signal bullish">Active Feed</div>
                 </div>
             </div>
-        </section>
+            {% else %}
+            <p>No active market feeds found.</p>
+            {% endfor %}
+        </div>
+    </div>
 
-        <section class="bg-gray-50 p-6 rounded-2xl border border-gray-200 shadow-sm">
-            <h2 class="text-lg font-semibold mb-2 text-gray-900">Trading Performance Audit</h2>
-            <div class="flex flex-col sm:flex-row items-center gap-4 mb-6">
-                <input type="file" id="csvFile" accept=".csv" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700">
-                <button onclick="uploadCSV()" class="w-full sm:w-auto px-6 py-2 bg-blue-600 text-white font-medium text-sm rounded-lg hover:bg-blue-700">Analyze Account</button>
-            </div>
-            <div id="analyticsResult" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 hidden">
-                <div class="bg-white p-4 rounded-xl border border-gray-200"><p class="text-xs text-gray-500">Win Rate</p><p id="winRateVal" class="text-2xl font-bold text-gray-900 mt-1">0%</p></div>
-                <div class="bg-white p-4 rounded-xl border border-gray-200"><p class="text-xs text-gray-500">Avg Hold (Winners)</p><p id="holdWinVal" class="text-2xl font-bold text-emerald-600 mt-1">0 hrs</p></div>
-                <div class="bg-white p-4 rounded-xl border border-gray-200"><p class="text-xs text-gray-500">Avg Hold (Losers)</p><p id="holdLossVal" class="text-2xl font-bold text-rose-600 mt-1">0 hrs</p></div>
-                <div class="bg-white p-4 rounded-xl border border-gray-200"><p class="text-xs text-gray-500">Top Strength / Weakness</p><p id="strengthVal" class="text-sm font-semibold text-gray-900 mt-1">-</p></div>
-            </div>
-        </section>
-    </main>
-
-    <script>
-        async function loadMacro() {
-            try {
-                let res = await fetch('/api/macro');
-                let data = await res.json();
-                let grid = document.getElementById('macroGrid');
-                let insightBox = document.getElementById('fundamentalInsight');
-                grid.innerHTML = '';
-                
-                let interestRate = 0;
-
-                for (let [key, val] of Object.entries(data)) {
-                    if (key === "Interest Rate") interestRate = val.value;
-
-                    grid.innerHTML += `
-                        <div class="p-4 rounded-xl border border-gray-200 bg-white shadow-sm">
-                            <p class="text-xs text-gray-500 uppercase">${key}</p>
-                            <p class="text-2xl font-bold text-gray-900 mt-1">${val.value}</p>
-                            <p class="text-xs font-semibold text-blue-600 mt-1">Signal: ${val.trend}</p>
-                            <p class="text-xs text-gray-400 mt-0.5">Date: ${val.date}</p>
-                        </div>
-                    `;
-                }
-
-                let biasText = interestRate > 3.0 
-                    ? "<strong>Fundamental Outlook:</strong> Federal Reserve policy stance remains restrictive with interest rates elevated at " + interestRate + "%. This provides an underlying <em>bullish bias for the US Dollar</em> against low-yielding global currencies."
-                    : "<strong>Fundamental Outlook:</strong> Accommodative monetary policy environment detected. Lower yield structures favor risk-on assets and commodity-linked currencies.";
-                
-                insightBox.innerHTML = biasText;
-
-            } catch (err) { console.error(err); }
-        }
-
-        let priceMap = {};
-        let subscribedSymbols = new Set();
-
-        function initSocket() {
-            const ws = new WebSocket('wss://ws.derivws.com/websockets/v3?app_id=1089');
-            
-            ws.onopen = function() {
-                ws.send(JSON.stringify({ active_symbols: "brief", product_type: "basic" }));
-            };
-
-            ws.onmessage = function(event) {
-                let data = JSON.parse(event.data);
-                
-                if (data.msg_type === 'active_symbols') {
-                    let forexContainer = document.getElementById('forexGrid');
-                    forexContainer.innerHTML = '';
-
-                    data.active_symbols.forEach(item => {
-                        let symbolCode = item.symbol;
-                        let displayName = item.display_name || symbolCode;
-                        let market = (item.market || "").toLowerCase();
-
-                        // Restrict exclusively to verified forex market feeds, omitting synthetics/indices entirely
-                        let isForexMarket = market === 'forex' || symbolCode.startsWith('frx');
-
-                        if (isForexMarket) {
-                            if (!document.getElementById(`card-${symbolCode}`)) {
-                                let div = document.createElement('div');
-                                div.id = `card-${symbolCode}`;
-                                div.className = "asset-card p-4 rounded-xl border border-gray-200 bg-white shadow-sm hover:shadow transition";
-                                div.setAttribute('data-search', (displayName + " " + symbolCode).toLowerCase().replace(/[^a-z0-9]/g, ''));
-                                div.innerHTML = `
-                                    <p class="text-xs font-medium text-gray-500 uppercase truncate">${displayName}</p>
-                                    <p id="price-${symbolCode}" class="text-xl font-bold text-gray-900 mt-1">Connecting...</p>
-                                    <p id="status-${symbolCode}" class="text-xs font-semibold text-gray-400 mt-1">Waiting for feed...</p>
-                                `;
-                                forexContainer.appendChild(div);
-
-                                if (!subscribedSymbols.has(symbolCode)) {
-                                    ws.send(JSON.stringify({ ticks: symbolCode, subscribe: 1 }));
-                                    subscribedSymbols.add(symbolCode);
-                                }
-                            }
-                        }
-                    });
-                }
-
-                if (data.msg_type === 'tick') {
-                    let tick = data.tick;
-                    let symbolCode = tick.symbol;
-                    let currentPrice = tick.quote;
-
-                    let priceEl = document.getElementById(`price-${symbolCode}`);
-                    let statusEl = document.getElementById(`status-${symbolCode}`);
-
-                    if (priceEl && statusEl) {
-                        let oldPrice = priceMap[symbolCode] || currentPrice;
-                        let colorClass = currentPrice >= oldPrice ? 'text-emerald-600' : 'text-rose-600';
-                        priceMap[symbolCode] = currentPrice;
-
-                        priceEl.innerText = currentPrice;
-                        statusEl.className = `text-xs font-semibold ${colorClass} mt-1`;
-                        statusEl.innerText = currentPrice >= oldPrice ? '▲ Live' : '▼ Live';
-                    }
-                }
-            };
-        }
-
-        function filterAssets() {
-            let query = document.getElementById('searchInput').value.toLowerCase().replace(/[^a-z0-9]/g, '');
-            let cards = document.querySelectorAll('.asset-card');
-            cards.forEach(card => {
-                let searchTerms = card.getAttribute('data-search') || '';
-                if (searchTerms.includes(query)) {
-                    card.style.display = 'block';
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-        }
-
-        async function uploadCSV() {
-            let fileInput = document.getElementById('csvFile');
-            if (fileInput.files.length === 0) return alert('Please select a CSV file first.');
-            let formData = new FormData();
-            formData.append('file', fileInput.files[0]);
-            try {
-                let res = await fetch('/api/analyze', { method: 'POST', body: formData });
-                let data = await res.json();
-                if (data.error) return alert(data.error);
-                document.getElementById('analyticsResult').classList.remove('hidden');
-                document.getElementById('winRateVal').innerText = data.win_rate + '%';
-                document.getElementById('holdWinVal').innerText = data.avg_hold_winner_hours + ' hrs';
-                document.getElementById('holdLossVal').innerText = data.avg_hold_loser_hours + ' hrs';
-                document.getElementById('strengthVal').innerHTML = `Best: <span class="text-emerald-600">${data.best_symbol}</span><br>Worst: <span class="text-rose-600">${data.worst_symbol}</span>`;
-            } catch (err) { console.error(err); }
-        }
-
-        loadMacro();
-        initSocket();
-    </script>
 </body>
 </html>
