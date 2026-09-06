@@ -94,7 +94,8 @@ def index():
         crypto_pairs=crypto_pairs,
         news_items=news_items,
         fred_yield="4.34%",
-        policy_stance="Restrictive"
+        macro_title="Liquidity Expansion & Risk-On Flow",
+        policy_stance="Neutral / Rate Cuts Anticipated"
     )
 
 if __name__ == '__main__':
