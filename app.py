@@ -87,12 +87,21 @@ def index():
         {"symbol": "BTC/USDT", "rate": btc_price, "signal": "Risk-On Liquidity Stream"}
     ]
 
+    fred_snapshot = [
+        {"title": "CPI", "value": "2.9%", "desc": "Consumer inflation", "trend": "+0.2%"},
+        {"title": "Fed Rate", "value": "5.25%", "desc": "Federal funds rate", "trend": "Hold"},
+        {"title": "2Y Treasury", "value": "4.34%", "desc": "US 2-year yield", "trend": "-0.04"},
+        {"title": "NFP Jobs", "value": "142K", "desc": "Monthly payroll change", "trend": "Beaten"},
+        {"title": "Unemployment", "value": "4.2%", "desc": "US unemployment rate", "trend": "+0.1%"}
+    ]
+
     return render_template(
         'index.html', 
         forex_pairs=forex_pairs, 
         commodity_pairs=commodity_pairs, 
         crypto_pairs=crypto_pairs,
         news_items=news_items,
+        fred_snapshot=fred_snapshot,
         fred_yield="4.34%",
         macro_title="Liquidity Expansion & Risk-On Flow",
         policy_stance="Neutral / Rate Cuts Anticipated"
