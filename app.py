@@ -9,23 +9,22 @@ app = Flask(__name__)
 def index():
     finnhub_key = os.environ.get("FINNHUB_API_KEY", "Daetc89r01qqo7nu2ucgdaetc89r01qqo7nu2ud0")
 
-    # 1. Fetch live Forex rates via Frankfurter API
-    eur_usd = "1.0850"
-    gbp_usd = "1.2640"
-    usd_jpy = "155.20"
+    # 1. Fetch live rates for all major Forex pairs via Frankfurter API
+    eur_usd, gbp_usd, usd_jpy, aud_usd, usd_cad, usd_chf, nzd_usd = "1.0850", "1.2640", "155.20", "0.6550", "1.3650", "0.8900", "0.6100"
     try:
         fx_resp = requests.get("https://api.frankfurter.app/latest?from=USD", timeout=5).json()
         rates = fx_resp.get("rates", {})
-        if "EUR" in rates:
-            eur_usd = f"{1 / rates['EUR']:.4f}"
-        if "GBP" in rates:
-            gbp_usd = f"{1 / rates['GBP']:.4f}"
-        if "JPY" in rates:
-            usd_jpy = f"{rates['JPY']:.2f}"
+        if "EUR" in rates: eur_usd = f"{1 / rates['EUR']:.4f}"
+        if "GBP" in rates: gbp_usd = f"{1 / rates['GBP']:.4f}"
+        if "JPY" in rates: usd_jpy = f"{rates['JPY']:.2f}"
+        if "AUD" in rates: aud_usd = f"{1 / rates['AUD']:.4f}"
+        if "CAD" in rates: usd_cad = f"{rates['CAD']:.4f}"
+        if "CHF" in rates: usd_chf = f"{rates['CHF']:.4f}"
+        if "NZD" in rates: nzd_usd = f"{1 / rates['NZD']:.4f}"
     except Exception:
         pass
 
-    # 2. Fetch live Gold & Silver via yfinance (Direct Spot/Futures data)
+    # 2. Fetch live Gold & Silver via yfinance
     gold_price = "$4,430.00"
     silver_price = "$66.15"
     try:
@@ -72,7 +71,11 @@ def index():
     forex_pairs = [
         {"symbol": "EUR/USD", "rate": eur_usd, "signal": "Bullish Bias (ECB Hawkish / Fed Hold)"},
         {"symbol": "GBP/USD", "rate": gbp_usd, "signal": "Neutral-Bullish (UK Growth Resilient)"},
-        {"symbol": "USD/JPY", "rate": usd_jpy, "signal": "Bearish USD (Yields Capped)"}
+        {"symbol": "USD/JPY", "rate": usd_jpy, "signal": "Bearish USD (Yields Capped)"},
+        {"symbol": "AUD/USD", "rate": aud_usd, "signal": "Bullish (Commodity Linked Momentum)"},
+        {"symbol": "USD/CAD", "rate": usd_cad, "signal": "Neutral (Oil & BOC Divergence)"},
+        {"symbol": "USD/CHF", "rate": usd_chf, "signal": "Balanced Safe Haven Flows"},
+        {"symbol": "NZD/USD", "rate": nzd_usd, "signal": "Bullish (Dairy & RBNZ Policy)"}
     ]
 
     commodity_pairs = [
