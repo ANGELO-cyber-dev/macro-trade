@@ -25,16 +25,16 @@ def index():
     except Exception:
         pass
 
-    # 2. Fetch live Gold & Silver via yfinance
-    gold_price = "$2,345.50"
-    silver_price = "$29.65"
+    # 2. Fetch live Gold & Silver via yfinance (Direct Spot/Futures data)
+    gold_price = "$4,430.00"
+    silver_price = "$66.15"
     try:
         g_data = yf.Ticker("GC=F").history(period="1d")
-        if not g_data.empty:
+        if not g_data.empty and g_data['Close'].iloc[-1] > 100:
             gold_price = f"${g_data['Close'].iloc[-1]:,.2f}"
             
         s_data = yf.Ticker("SI=F").history(period="1d")
-        if not s_data.empty:
+        if not s_data.empty and s_data['Close'].iloc[-1] > 1:
             silver_price = f"${s_data['Close'].iloc[-1]:,.2f}"
     except Exception:
         pass
