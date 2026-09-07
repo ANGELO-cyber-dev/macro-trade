@@ -1,9 +1,7 @@
 Flask
-SQLAlchemy
-psycopg2-binary
-requests
-apscheduler
-python-dotenv
 gunicorn
-tzdata
-scoring
+SQLAlchemy
+APScheduler
+requests
+finnhub-python
+psycopg2-binary
