@@ -7,14 +7,19 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { background-color: #0b0f19; color: #ffffff; font-family: system-ui, -apple-system, sans-serif; }
-        .sidebar { width: 260px; height: 100vh; position: fixed; background: #111827; border-right: 1px solid #1f2937; padding: 20px; }
-        .main-content { margin-left: 260px; padding: 30px; }
+        body { background-color: #0b0f19; color: #ffffff; font-family: system-ui, -apple-system, sans-serif; overflow-x: hidden; }
+        .sidebar { width: 240px; height: 100vh; position: fixed; top: 0; left: 0; background: #111827; border-right: 1px solid #1f2937; padding: 20px; z-index: 100; }
+        .main-content { margin-left: 240px; padding: 25px; }
         .nav-link { color: #ffffff; border-radius: 8px; margin-bottom: 5px; font-weight: 500; }
         .nav-link:hover, .nav-link.active { color: #ffffff; background: #1f2937; }
-        .card-custom { background: #111827; border: 1px solid #1f2937; border-radius: 12px; padding: 24px; color: #ffffff; }
-        .table { color: #ffffff; }
+        .card-custom { background: #111827; border: 1px solid #1f2937; border-radius: 12px; padding: 20px; color: #ffffff; }
+        .table { color: #ffffff; font-size: 0.9rem; }
         .table-dark { background-color: #111827; color: #ffffff; }
+        .text-white-50 { color: #d1d5db !important; }
+        @media (max-width: 768px) {
+            .sidebar { width: 100%; height: auto; position: relative; }
+            .main-content { margin-left: 0; padding: 15px; }
+        }
     </style>
 </head>
 <body>
@@ -26,19 +31,21 @@
             <li class="nav-item"><a class="nav-link {% if active_page == 'signals' %}active{% endif %}" href="/signals"><i class="fa-solid fa-bolt me-2"></i>Trading Signals</a></li>
             <li class="nav-item"><a class="nav-link {% if active_page == 'sizer' %}active{% endif %}" href="/sizer"><i class="fa-solid fa-calculator me-2"></i>Position Sizer</a></li>
         </ul>
-        <div class="p-3 bg-dark rounded-3 border border-secondary">
+        <div class="p-3 bg-dark rounded-3 border border-secondary mt-3">
             <span class="text-white-50 d-block small">Macro Regime Score</span>
-            <span class="fs-4 fw-bold text-success">{{ macro_score }}</span>
+            <span class="fs-4 fw-bold text-success">{{ macro_score }} / 100</span>
         </div>
     </div>
 
     <div class="main-content">
-        <h2 class="fw-bold text-white mb-1">Macroeconomic Indicators</h2>
-        <p class="text-white-50 mb-4">Official FRED economic metrics tracking inflation, labor markets, and liquidity.</p>
+        <div class="mb-4">
+            <h2 class="fw-bold text-white mb-1">Macroeconomic Indicators</h2>
+            <p class="text-white-50 mb-0">Official FRED economic metrics tracking inflation, labor markets, and liquidity.</p>
+        </div>
         
         <div class="card-custom">
             <div class="table-responsive">
-                <table class="table table-dark align-middle mb-0">
+                <table class="table table-dark table-hover align-middle mb-0">
                     <thead>
                         <tr class="text-white-50">
                             <th>Series ID</th>
