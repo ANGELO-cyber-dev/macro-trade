@@ -159,3 +159,8 @@ def api_quotes():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=False)
+
+@app.route("/tracker")
+def tracker():
+    sample_macro_score = calculate_macro_score()
+    return render_template("tracker.html", macro_score=sample_macro_score, active_page="tracker")

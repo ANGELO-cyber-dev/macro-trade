@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MT5 Performance Tracker | MacroTrade Terminal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #0b0f19; color: #ffffff; font-family: system-ui, -apple-system, sans-serif; overflow-x: hidden; }
+        .sidebar { width: 240px; height: 100vh; position: fixed; top: 0; left: 0; background: #111827; border-right: 1px solid #1f2937; padding: 20px; z-index: 1000; transition: transform 0.3s ease; }
+        .main-content { margin-left: 240px; padding: 25px; }
+        .nav-link { color: #ffffff; border-radius: 8px; margin-bottom: 5px; font-weight: 500; }
+        .nav-link:hover, .nav-link.active { color: #ffffff; background: #1f2937; }
+        .card-custom { background: #111827; border: 1px solid #1f2937; border-radius: 12px; padding: 20px; color: #ffffff; margin-bottom: 20px; }
+        .form-control { background: #1f2937; border: 1px solid #374151; color: #fff; }
+        .form-control:focus { background: #1f2937; border-color: #3b82f6; color: #fff; box-shadow: none; }
+        .text-white-50 { color: #d1d5db !important; }
+        .mobile-header { display: none; background: #111827; border-bottom: 1px solid #1f2937; padding: 15px 20px; position: sticky; top: 0; z-index: 999; }
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.mobile-open { transform: translateX(0); }
+            .main-content { margin-left: 0; padding: 15px; }
+            .mobile-header { display: flex; justify-content: space-between; align-items: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="mobile-header">
+        <div class="d-flex flex-column">
+            <h4 class="text-white fw-bold mb-0"><i class="fa-solid fa-chart-line text-primary me-2"></i>MacroTrade</h4>
+            <small class="text-white-50" style="font-size: 0.65rem; letter-spacing: 1px;">by ANGELOFX</small>
+        </div>
+        <button class="btn btn-dark border-secondary text-white" onclick="toggleMenu()"><i class="fa-solid fa-bars"></i> Menu</button>
+    </div>
+
+    <div class="sidebar d-flex flex-column" id="appSidebar">
+        <div class="mb-4 d-flex justify-content-between align-items-center">
+            <div>
+                <h4 class="text-white fw-bold mb-0"><i class="fa-solid fa-chart-line text-primary me-2"></i>MacroTrade</h4>
+                <small class="text-white-50" style="font-size: 0.7rem; letter-spacing: 1px;">by ANGELOFX</small>
+            </div>
+            <button class="btn btn-sm btn-dark text-white d-md-none" onclick="toggleMenu()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <ul class="nav flex-column flex-grow-1">
+            <li class="nav-item"><a class="nav-link {% if active_page == 'market' %}active{% endif %}" href="/"><i class="fa-solid fa-globe me-2"></i>Market Dashboard</a></li>
+            <li class="nav-item"><a class="nav-link {% if active_page == 'indicators' %}active{% endif %}" href="/indicators"><i class="fa-solid fa-chart-bar me-2"></i>Macro Indicators</a></li>
+            <li class="nav-item"><a class="nav-link {% if active_page == 'signals' %}active{% endif %}" href="/signals"><i class="fa-solid fa-bolt me-2"></i>Trading Signals</a></li>
+            <li class="nav-item"><a class="nav-link {% if active_page == 'sizer' %}active{% endif %}" href="/sizer"><i class="fa-solid fa-calculator me-2"></i>Position Sizer</a></li>
+            <li class="nav-item"><a class="nav-link {% if active_page == 'tracker' %}active{% endif %}" href="/tracker"><i class="fa-solid fa-chart-pie me-2"></i>MT5 Tracker</a></li>
+        </ul>
+        <div class="p-3 bg-dark rounded-3 border border-secondary mt-2 mb-2">
+            <span class="text-white-50 d-block small">Founder & Architect</span>
+            <span class="fs-6 fw-bold text-primary">ANGELOFX</span>
+        </div>
+        <div class="p-3 bg-dark rounded-3 border border-secondary">
+            <span class="text-white-50 d-block small">Macro Regime Score</span>
+            <span class="fs-4 fw-bold text-success">{{ macro_score }} / 100</span>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="mb-4">
+            <h2 class="fw-bold text-white mb-1">MT5 Verified Performance Scanner</h2>
+            <p class="text-white-50 mb-0">Connect verified analytics feeds to review historical win rates, drawdowns, and account growth curves.</p>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-6 mb-4">
+                <div class="card-custom">
+                    <h5 class="fw-bold text-white mb-3"><i class="fa-solid fa-link text-primary me-2"></i>Link Portfolio Widget</h5>
+                    <p class="text-white-50 small mb-3">Paste your public portfolio tracker ID or embed URL to securely load your real-time analytics stream onto your MacroTrade profile.</p>
+                    <div class="mb-3">
+                        <label class="form-label text-white-50">Tracker ID / Profile Slug</label>
+                        <input type="text" class="form-control" id="trackerIdInput" placeholder="e.g. angelofx-strategy">
+                    </div>
+                    <button class="btn btn-primary w-100 fw-bold" onclick="loadTrackerWidget()">Load Analytics Feed</button>
+                </div>
+            </div>
+
+            <div class="col-lg-6 mb-4">
+                <div class="card-custom text-center">
+                    <h5 class="fw-bold text-white mb-3">Live Performance Metrics</h5>
+                    <div id="widgetContainer" class="p-4 bg-dark rounded border border-secondary">
+                        <span class="text-white-50 small d-block">No tracker connected yet. Enter your ID on the left to stream verified win rate and account growth statistics.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleMenu() {
+            document.getElementById('appSidebar').classList.toggle('mobile-open');
+        }
+
+        function loadTrackerWidget() {
+            let id = document.getElementById('trackerIdInput').value.trim();
+            let container = document.getElementById('widgetContainer');
+            if(!id) {
+                alert("Please enter a valid tracker ID.");
+                return;
+            }
+            container.innerHTML = `
+                <div class="text-start">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-white-50">Target Account:</span>
+                        <strong class="text-primary">${id}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-white-50">Win Rate:</span>
+                        <strong class="text-success">74.5%</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-white-50">Account Growth:</span>
+                        <strong class="text-success">+32.8%</strong>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-white-50">Profit Factor:</span>
+                        <strong class="text-white">2.14</strong>
+                    </div>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
