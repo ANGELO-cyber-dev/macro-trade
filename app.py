@@ -212,3 +212,8 @@ if __name__ == "__main__":
 @app.errorhandler(404)
 def page_not_found(e):
     return redirect(url_for("community"))
+
+
+@app.route("/comn")
+def comn_alias():
+    return redirect(url_for("community"))
