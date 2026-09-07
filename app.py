@@ -4,6 +4,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from sqlalchemy.orm import joinedload
 from database import SessionLocal, init_db
 from models import Instrument, MarketQuote, MacroIndicator, AssetClass
+from scoring import calculate_macro_score
 import requests
 
 app = Flask(__name__)
@@ -15,7 +16,6 @@ def seed_production_data():
         db.close()
         return
 
-    print("Seeding initial production database...")
     instruments = [
         Instrument(ticker="EUR/USD", name="Euro / US Dollar", asset_class=AssetClass.FX),
         Instrument(ticker="GBP/USD", name="British Pound / US Dollar", asset_class=AssetClass.FX),
@@ -38,7 +38,6 @@ def seed_production_data():
     db.add_all(macro_indicators)
     db.commit()
     db.close()
-    print("Production database successfully seeded.")
 
 seed_production_data()
 
@@ -55,7 +54,6 @@ TICKER_MAP = {
 def background_live_sync():
     db = SessionLocal()
     headers = {"User-Agent": "Mozilla/5.0"}
-    
     for internal_ticker, yf_symbol in TICKER_MAP.items():
         instrument = db.query(Instrument).filter_by(ticker=internal_ticker).first()
         if not instrument:
@@ -65,11 +63,8 @@ def background_live_sync():
             response = requests.get(url, headers=headers, timeout=10)
             if response.status_code != 200:
                 continue
-                
             data = response.json()
-            result = data["chart"]["result"][0]
-            meta = result["meta"]
-            
+            meta = data["chart"]["result"][0]["meta"]
             price = float(meta["regularMarketPrice"])
             previous_close = float(meta.get("chartPreviousClose", price))
             change = ((price - previous_close) / previous_close) * 100 if previous_close > 0 else 0.0
@@ -80,16 +75,10 @@ def background_live_sync():
                 quote.change_24h = change
                 quote.updated_at = datetime.utcnow()
             else:
-                db.add(MarketQuote(
-                    instrument_id=instrument.id,
-                    price=price,
-                    change_24h=change,
-                    source="YahooAPI"
-                ))
+                db.add(MarketQuote(instrument_id=instrument.id, price=price, change_24h=change, source="YahooAPI"))
             db.commit()
-        except Exception as e:
+        except Exception:
             db.rollback()
-            
     db.close()
 
 background_live_sync()
@@ -102,21 +91,18 @@ scheduler.start()
 def index():
     db = SessionLocal()
     quotes = db.query(MarketQuote).options(joinedload(MarketQuote.instrument)).all()
+    
+    # Generate mock macro scoring breakdown for demonstration of the transparent engine
+    sample_macro_score = calculate_macro_score(inflation_val=0.3, labor_val=0.2, growth_val=0.1, liquidity_val=0.4)
+    
     db.close()
-    return render_template("index.html", quotes=quotes)
+    return render_template("index.html", quotes=quotes, macro_score=sample_macro_score)
 
-@app.route("/api/v1/quotes")
-def api_quotes():
-    db = SessionLocal()
-    quotes = db.query(MarketQuote).options(joinedload(MarketQuote.instrument)).all()
-    data = [{
-        "ticker": q.instrument.ticker,
-        "price": float(q.price),
-        "change_24h": q.change_24h,
-        "updated_at": q.updated_at.isoformat()
-    } for q in quotes]
-    db.close()
-    return jsonify(data)
+@app.route("/api/v1/scoring")
+def api_scoring():
+    # Transparent API endpoint exposing macro score metrics
+    score_data = calculate_macro_score(inflation_val=0.3, labor_val=0.2, growth_val=0.1, liquidity_val=0.4)
+    return jsonify(score_data)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
