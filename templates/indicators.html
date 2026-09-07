@@ -3,60 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Macro Indicators | Macro Trade</title>
+    <title>Macro Indicators | MacroTrade Terminal</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { background-color: #0b0e14; color: #e1e4e8; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        .card { background-color: #161b22; border: 1px solid #30363d; }
-        .table { color: #e1e4e8; font-size: 0.9rem; }
-        .table-dark { background-color: #161b22; }
-        .navbar { border-bottom: 1px solid #30363d; background-color: #161b22 !important; }
-        .nav-link { color: #8b949e !important; }
-        .nav-link.active { color: #e1e4e8 !important; font-weight: 600; }
+        body { background-color: #0b0f19; color: #ffffff; font-family: system-ui, -apple-system, sans-serif; }
+        .sidebar { width: 260px; height: 100vh; position: fixed; background: #111827; border-right: 1px solid #1f2937; padding: 20px; }
+        .main-content { margin-left: 260px; padding: 30px; }
+        .nav-link { color: #ffffff; border-radius: 8px; margin-bottom: 5px; font-weight: 500; }
+        .nav-link:hover, .nav-link.active { color: #ffffff; background: #1f2937; }
+        .card-custom { background: #111827; border: 1px solid #1f2937; border-radius: 12px; padding: 24px; color: #ffffff; }
+        .table { color: #ffffff; }
+        .table-dark { background-color: #111827; color: #ffffff; }
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark px-3 py-3">
-        <div class="container-fluid">
-            <a class="navbar-brand fw-bold fs-6" href="/">MACRO TRADE</a>
-            <span class="badge bg-success ms-2">LIVE</span>
-            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
-                <ul class="navbar-nav mt-2 mt-lg-0">
-                    <li class="nav-item"><a class="nav-link" href="/">Market Feeds</a></li>
-                    <li class="nav-item"><a class="nav-link active" href="/indicators">Macro Indicators</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/signals">Trade Signals</a></li>
-                </ul>
-            </div>
+    <div class="sidebar d-flex flex-column">
+        <h4 class="text-white fw-bold mb-4"><i class="fa-solid fa-chart-line text-primary me-2"></i>MacroTrade</h4>
+        <ul class="nav flex-column flex-grow-1">
+            <li class="nav-item"><a class="nav-link {% if active_page == 'market' %}active{% endif %}" href="/"><i class="fa-solid fa-globe me-2"></i>Market Dashboard</a></li>
+            <li class="nav-item"><a class="nav-link {% if active_page == 'indicators' %}active{% endif %}" href="/indicators"><i class="fa-solid fa-chart-bar me-2"></i>Macro Indicators</a></li>
+            <li class="nav-item"><a class="nav-link {% if active_page == 'signals' %}active{% endif %}" href="/signals"><i class="fa-solid fa-bolt me-2"></i>Trading Signals</a></li>
+            <li class="nav-item"><a class="nav-link {% if active_page == 'sizer' %}active{% endif %}" href="/sizer"><i class="fa-solid fa-calculator me-2"></i>Position Sizer</a></li>
+        </ul>
+        <div class="p-3 bg-dark rounded-3 border border-secondary">
+            <span class="text-white-50 d-block small">Macro Regime Score</span>
+            <span class="fs-4 fw-bold text-success">{{ macro_score }}</span>
         </div>
-    </nav>
+    </div>
 
-    <div class="container-fluid px-3 my-4">
-        <h5 class="fw-semibold text-light mb-3">Fundamental Macro Series</h5>
-        <div class="card shadow-sm">
+    <div class="main-content">
+        <h2 class="fw-bold text-white mb-1">Macroeconomic Indicators</h2>
+        <p class="text-white-50 mb-4">Official FRED economic metrics tracking inflation, labor markets, and liquidity.</p>
+        
+        <div class="card-custom">
             <div class="table-responsive">
-                <table class="table table-dark table-hover align-middle mb-0 text-nowrap">
+                <table class="table table-dark align-middle mb-0">
                     <thead>
-                        <tr class="text-secondary small">
-                            <th>SERIES ID</th>
-                            <th>INDICATOR NAME</th>
-                            <th>CATEGORY</th>
-                            <th>FREQUENCY</th>
+                        <tr class="text-white-50">
+                            <th>Series ID</th>
+                            <th>Indicator Name</th>
+                            <th>Category</th>
+                            <th>Frequency</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for ind in indicators %}
                         <tr>
-                            <td class="fw-bold text-light">{{ ind.series_id }}</td>
-                            <td>{{ ind.name }}</td>
+                            <td class="fw-bold text-primary">{{ ind.series_id }}</td>
+                            <td class="text-white">{{ ind.name }}</td>
                             <td><span class="badge bg-secondary">{{ ind.category }}</span></td>
-                            <td class="text-muted small">{{ ind.frequency }}</td>
-                        </tr>
-                        {% else %}
-                        <tr>
-                            <td colspan="4" class="text-center text-muted py-4">No indicators found.</td>
+                            <td class="text-white-50">{{ ind.frequency }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -64,6 +61,5 @@
             </div>
         </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

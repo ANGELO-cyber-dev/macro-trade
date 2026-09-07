@@ -3,217 +3,113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Macro Trade | Institutional Intelligence Engine</title>
+    <title>Market Dashboard | MacroTrade Terminal</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { background-color: #0b0e14; color: #e1e4e8; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        .card { background-color: #161b22; border: 1px solid #30363d; }
-        .table { color: #e1e4e8; font-size: 0.9rem; }
-        .table-dark { background-color: #161b22; }
-        .positive { color: #3fb950; font-weight: 600; }
-        .negative { color: #f85149; font-weight: 600; }
-        .navbar { border-bottom: 1px solid #30363d; background-color: #161b22 !important; }
-        .nav-link { color: #8b949e !important; }
-        .nav-link.active { color: #e1e4e8 !important; font-weight: 600; }
-        .badge-bullish { background-color: rgba(63, 185, 80, 0.15); color: #3fb950; border: 1px solid #3fb950; }
-        .badge-bearish { background-color: rgba(248, 81, 73, 0.15); color: #f85149; border: 1px solid #f85149; }
-        .badge-neutral { background-color: rgba(210, 153, 34, 0.15); color: #d29922; border: 1px solid #d29922; }
-        .progress { background-color: #21262d; height: 10px; }
+        body { background-color: #0b0f19; color: #ffffff; font-family: system-ui, -apple-system, sans-serif; }
+        .sidebar { width: 260px; height: 100vh; position: fixed; background: #111827; border-right: 1px solid #1f2937; padding: 20px; }
+        .main-content { margin-left: 260px; padding: 30px; }
+        .nav-link { color: #ffffff; border-radius: 8px; margin-bottom: 5px; font-weight: 500; }
+        .nav-link:hover, .nav-link.active { color: #ffffff; background: #1f2937; }
+        .card-custom { background: #111827; border: 1px solid #1f2937; border-radius: 12px; padding: 24px; color: #ffffff; }
+        .table { color: #ffffff; }
+        .table-dark { background-color: #111827; color: #ffffff; }
+        .text-muted { color: #d1d5db !important; }
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark px-3 py-3">
-        <div class="container-fluid">
-            <!-- Menu items on the top left -->
-            <a class="navbar-brand fw-bold fs-6 me-4" href="/">MACRO TRADE</a>
-            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item"><a class="nav-link active" href="/">Market Feeds</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/indicators">Macro Indicators</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/signals">Trade Signals</a></li>
-                </ul>
-                <span class="badge bg-success">LIVE SYSTEM</span>
-            </div>
+    <div class="sidebar d-flex flex-column">
+        <h4 class="text-white fw-bold mb-4"><i class="fa-solid fa-chart-line text-primary me-2"></i>MacroTrade</h4>
+        <ul class="nav flex-column flex-grow-1">
+            <li class="nav-item"><a class="nav-link {% if active_page == 'market' %}active{% endif %}" href="/"><i class="fa-solid fa-globe me-2"></i>Market Dashboard</a></li>
+            <li class="nav-item"><a class="nav-link {% if active_page == 'indicators' %}active{% endif %}" href="/indicators"><i class="fa-solid fa-chart-bar me-2"></i>Macro Indicators</a></li>
+            <li class="nav-item"><a class="nav-link {% if active_page == 'signals' %}active{% endif %}" href="/signals"><i class="fa-solid fa-bolt me-2"></i>Trading Signals</a></li>
+            <li class="nav-item"><a class="nav-link {% if active_page == 'sizer' %}active{% endif %}" href="/sizer"><i class="fa-solid fa-calculator me-2"></i>Position Sizer</a></li>
+        </ul>
+        <div class="p-3 bg-dark rounded-3 border border-secondary">
+            <span class="text-white-50 d-block small">Macro Regime Score</span>
+            <span class="fs-4 fw-bold text-success">{{ macro_score }}</span>
         </div>
-    </nav>
+    </div>
 
-    <div class="container-fluid px-3 my-4">
-        <!-- Transparent Macro Intelligence Scorecard -->
-        <div class="card shadow-sm p-4 mb-4">
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-                <h5 class="fw-semibold text-light mb-0">Transparent Macro Decision Engine</h5>
-                <span class="badge {{ 'badge-bullish' if macro_score.bias == 'BULLISH' else ('badge-bearish' if macro_score.bias == 'BEARISH' else 'badge-neutral') }} px-3 py-2 fs-6">
-                    Bias: {{ macro_score.bias }} (Score: {{ macro_score.composite_score }})
-                </span>
-            </div>
-            <p class="text-muted small mb-3">Real-time factor decomposition explaining fundamental asset biases.</p>
-            <div class="row g-3">
-                <div class="col-6 col-md-3">
-                    <div class="p-3 bg-dark rounded border border-secondary">
-                        <span class="text-secondary small d-block">Inflation Impact</span>
-                        <strong class="fs-5">{{ macro_score.components.inflation_impact }}%</strong>
-                    </div>
-                </div>
-                <div class="col-6 col-md-3">
-                    <div class="p-3 bg-dark rounded border border-secondary">
-                        <span class="text-secondary small d-block">Labor Market</span>
-                        <strong class="fs-5">{{ macro_score.components.labor_market }}%</strong>
-                    </div>
-                </div>
-                <div class="col-6 col-md-3">
-                    <div class="p-3 bg-dark rounded border border-secondary">
-                        <span class="text-secondary small d-block">Economic Growth</span>
-                        <strong class="fs-5">{{ macro_score.components.economic_growth }}%</strong>
-                    </div>
-                </div>
-                <div class="col-6 col-md-3">
-                    <div class="p-3 bg-dark rounded border border-secondary">
-                        <span class="text-secondary small d-block">Liquidity Conditions</span>
-                        <strong class="fs-5">{{ macro_score.components.liquidity_conditions }}%</strong>
-                    </div>
-                </div>
+    <div class="main-content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold text-white mb-1">Global Market Terminal</h2>
+                <p class="text-white-50 mb-0">Live institutional quotes and macroeconomic telemetry.</p>
             </div>
         </div>
 
-        <div class="row g-4 mb-4">
-            <!-- Position Sizing Calculator Section -->
-            <div class="col-lg-6">
-                <div class="card shadow-sm p-4 h-100">
-                    <h5 class="fw-semibold text-light mb-3">Institutional Position Sizer</h5>
-                    <form id="sizingForm">
-                        <div class="mb-3">
-                            <label class="form-label text-secondary small">Account Balance ($)</label>
-                            <input type="number" id="accBalance" class="form-control bg-dark text-light border-secondary" value="100000">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label text-secondary small">Risk Tolerance (%)</label>
-                            <input type="number" id="riskPct" class="form-control bg-dark text-light border-secondary" value="1.0" step="0.1">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label text-secondary small">Stop Loss (Pips / Points)</label>
-                            <input type="number" id="stopLoss" class="form-control bg-dark text-light border-secondary" value="50">
-                        </div>
-                        <div class="p-3 bg-dark rounded border border-secondary text-center">
-                            <span class="text-secondary small d-block">Recommended Position Size</span>
-                            <strong id="resultLotSize" class="fs-4 text-success">2.00 Lots</strong>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <!-- Upcoming News & FRED News Strength Chart Interface -->
-            <div class="col-lg-6">
-                <div class="card shadow-sm p-4 h-100">
-                    <h5 class="fw-semibold text-light mb-3">Upcoming FRED News & Impact Strength</h5>
-                    <p class="text-muted small mb-3">Projected market volatility and structural strength rating per macro release.</p>
-                    
-                    <div class="mb-3">
-                        <div class="d-flex justify-content-between small mb-1">
-                            <span>Consumer Price Index (CPI YoY)</span>
-                            <span class="text-warning fw-bold">Impact: 92% (High Volatility)</span>
-                        </div>
-                        <div class="progress">
-                            <div class="progress-bar bg-danger" style="width: 92%"></div>
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <div class="d-flex justify-content-between small mb-1">
-                            <span>Nonfarm Payrolls (NFP)</span>
-                            <span class="text-info fw-bold">Impact: 85% (Strong Trend)</span>
-                        </div>
-                        <div class="progress">
-                            <div class="progress-bar bg-info" style="width: 85%"></div>
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <div class="d-flex justify-content-between small mb-1">
-                            <span>FOMC Rate Decision</span>
-                            <span class="text-success fw-bold">Impact: 98% (Max Regime Shift)</span>
-                        </div>
-                        <div class="progress">
-                            <div class="progress-bar bg-success" style="width: 98%"></div>
-                        </div>
-                    </div>
-
-                    <div>
-                        <div class="d-flex justify-content-between small mb-1">
-                            <span>M2 Money Supply Liquidity Print</span>
-                            <span class="text-secondary fw-bold">Impact: 60% (Moderate)</span>
-                        </div>
-                        <div class="progress">
-                            <div class="progress-bar bg-secondary" style="width: 60%"></div>
-                        </div>
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card-custom mb-4">
+                    <h5 class="fw-bold text-white mb-3">Asset Pricing Feed</h5>
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover align-middle mb-0">
+                            <thead>
+                                <tr class="text-white-50">
+                                    <th>Ticker</th>
+                                    <th>Asset Name</th>
+                                    <th>Price</th>
+                                    <th>24h Change</th>
+                                </tr>
+                            </thead>
+                            <tbody id="quotesTableBody">
+                                {% for q in quotes %}
+                                <tr>
+                                    <td class="fw-bold text-white">{{ q.instrument.ticker }}</td>
+                                    <td class="text-white-50">{{ q.instrument.name }}</td>
+                                    <td class="text-white" id="price-{{ q.instrument.ticker }}">{{ "%.4f"|format(q.price) if q.price < 10 else "%.2f"|format(q.price) }}</td>
+                                    <td>
+                                        <span class="badge {% if q.change_24h >= 0 %}bg-success{% else %}bg-danger{% endif %}" id="change-{{ q.instrument.ticker }}">
+                                            {{ "+%.2f"|format(q.change_24h) if q.change_24h >= 0 else "%.2f"|format(q.change_24h) }}%
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5 class="fw-semibold text-light mb-0">Real-Time Market Feeds</h5>
-            <span class="text-muted small">Auto-syncing every 5m</span>
-        </div>
-        
-        <div class="card shadow-sm">
-            <div class="table-responsive">
-                <table class="table table-dark table-hover align-middle mb-0 text-nowrap">
-                    <thead>
-                        <tr class="text-secondary small">
-                            <th>TICKER</th>
-                            <th>ASSET NAME</th>
-                            <th>PRICE</th>
-                            <th>24H CHANGE</th>
-                            <th>UPDATED</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for q in quotes %}
-                        <tr>
-                            <td class="fw-bold text-light">{{ q.instrument.ticker }}</td>
-                            <td class="text-muted small">{{ q.instrument.name }}</td>
-                            <td>{{ "%.4f"|format(q.price) }}</td>
-                            <td class="{{ 'positive' if q.change_24h >= 0 else 'negative' }}">
-                                {{ "%+.2f"|format(q.change_24h) }}%
-                            </td>
-                            <td class="text-muted small">{{ q.updated_at.strftime('%H:%M:%S') }}</td>
-                        </tr>
-                        {% else %}
-                        <tr>
-                            <td colspan="5" class="text-center text-muted py-4">Synchronizing live market feeds...</td>
-                        </tr>
+            <div class="col-lg-4">
+                <div class="card-custom mb-4">
+                    <h5 class="fw-bold text-white mb-3">Live Market News</h5>
+                    <div class="d-flex flex-column gap-3">
+                        {% for item in market_news %}
+                        <div class="p-3 bg-dark rounded border border-secondary">
+                            <span class="badge bg-primary mb-2">{{ item.source if item.source else 'News Wire' }}</span>
+                            <h6 class="text-white fw-bold mb-1"><a href="{{ item.url }}" target="_blank" class="text-white text-decoration-none">{{ item.headline }}</a></h6>
+                            <p class="text-white-50 small mb-0">{{ item.summary }}</p>
+                        </div>
                         {% endfor %}
-                    </tbody>
-                </table>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Dynamic position sizing calculation
-        const balanceInput = document.getElementById('accBalance');
-        const riskInput = document.getElementById('riskPct');
-        const slInput = document.getElementById('stopLoss');
-        const resultDisplay = document.getElementById('resultLotSize');
-
-        function calculateSizing() {
-            const balance = parseFloat(balanceInput.value) || 0;
-            const riskPct = parseFloat(riskInput.value) || 0;
-            const sl = parseFloat(slInput.value) || 1;
-            
-            const riskAmount = balance * (riskPct / 100);
-            const lotSize = riskAmount / (sl * 10); // Standard institutional rough estimation formula
-            resultDisplay.textContent = lotSize.toFixed(2) + " Lots ($" + riskAmount.toFixed(2) + " Risk)";
-        }
-
-        [balanceInput, riskInput, slInput].forEach(input => {
-            input.addEventListener('input', calculateSizing);
-        });
-        calculateSizing();
+        setInterval(async () => {
+            try {
+                let res = await fetch('/api/v1/quotes');
+                let data = await res.json();
+                data.forEach(q => {
+                    let priceEl = document.getElementById('price-' + q.ticker);
+                    let changeEl = document.getElementById('change-' + q.ticker);
+                    if (priceEl) priceEl.innerText = q.price < 10 ? q.price.toFixed(4) : q.price.toFixed(2);
+                    if (changeEl) {
+                        let chg = q.change_24h;
+                        changeEl.className = "badge " + (chg >= 0 ? "bg-success" : "bg-danger");
+                        changeEl.innerText = (chg >= 0 ? "+" : "") + chg.toFixed(2) + "%";
+                    }
+                });
+            } catch (err) {
+                console.error("Failed to poll live quotes:", err);
+            }
+        }, 60000);
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

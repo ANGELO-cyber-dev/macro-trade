@@ -3,54 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trade Signals | Macro Trade</title>
+    <title>Trading Signals | MacroTrade Terminal</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { background-color: #0b0e14; color: #e1e4e8; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        .card { background-color: #161b22; border: 1px solid #30363d; }
-        .navbar { border-bottom: 1px solid #30363d; background-color: #161b22 !important; }
-        .nav-link { color: #8b949e !important; }
-        .nav-link.active { color: #e1e4e8 !important; font-weight: 600; }
-        .badge-bullish { background-color: rgba(63, 185, 80, 0.15); color: #3fb950; border: 1px solid #3fb950; }
+        body { background-color: #0b0f19; color: #ffffff; font-family: system-ui, -apple-system, sans-serif; }
+        .sidebar { width: 260px; height: 100vh; position: fixed; background: #111827; border-right: 1px solid #1f2937; padding: 20px; }
+        .main-content { margin-left: 260px; padding: 30px; }
+        .nav-link { color: #ffffff; border-radius: 8px; margin-bottom: 5px; font-weight: 500; }
+        .nav-link:hover, .nav-link.active { color: #ffffff; background: #1f2937; }
+        .card-custom { background: #111827; border: 1px solid #1f2937; border-radius: 12px; padding: 24px; color: #ffffff; }
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark px-3 py-3">
-        <div class="container-fluid">
-            <a class="navbar-brand fw-bold fs-6" href="/">MACRO TRADE</a>
-            <span class="badge bg-success ms-2">LIVE</span>
-            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
-                <ul class="navbar-nav mt-2 mt-lg-0">
-                    <li class="nav-item"><a class="nav-link" href="/">Market Feeds</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/indicators">Macro Indicators</a></li>
-                    <li class="nav-item"><a class="nav-link active" href="/signals">Trade Signals</a></li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-
-    <div class="container-fluid px-3 my-4">
-        <h5 class="fw-semibold text-light mb-3">Automated Macro Trade Signals</h5>
-        <div class="card shadow-sm p-4 mb-3">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-                <h6 class="text-light mb-0">EUR/USD Regime Signal</h6>
-                <span class="badge badge-bullish px-2 py-1">BULLISH BIAS</span>
-            </div>
-            <p class="text-muted small mb-2">Driven by composite score of {{ macro_score.composite_score }}. Favorable liquidity and moderate inflation trend support risk-on currency positioning.</p>
-            <div class="text-secondary small">Generated via Transparent Macro Decision Engine</div>
-        </div>
-        <div class="card shadow-sm p-4">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-                <h6 class="text-light mb-0">GOLD Regime Signal</h6>
-                <span class="badge badge-bullish px-2 py-1">BULLISH BIAS</span>
-            </div>
-            <p class="text-muted small mb-2">Supported by monetary expansion and inflation hedge demand parameters.</p>
-            <div class="text-secondary small">Generated via Transparent Macro Decision Engine</div>
+    <div class="sidebar d-flex flex-column">
+        <h4 class="text-white fw-bold mb-4"><i class="fa-solid fa-chart-line text-primary me-2"></i>MacroTrade</h4>
+        <ul class="nav flex-column flex-grow-1">
+            <li class="nav-item"><a class="nav-link {% if active_page == 'market' %}active{% endif %}" href="/"><i class="fa-solid fa-globe me-2"></i>Market Dashboard</a></li>
+            <li class="nav-item"><a class="nav-link {% if active_page == 'indicators' %}active{% endif %}" href="/indicators"><i class="fa-solid fa-chart-bar me-2"></i>Macro Indicators</a></li>
+            <li class="nav-item"><a class="nav-link {% if active_page == 'signals' %}active{% endif %}" href="/signals"><i class="fa-solid fa-bolt me-2"></i>Trading Signals</a></li>
+            <li class="nav-item"><a class="nav-link {% if active_page == 'sizer' %}active{% endif %}" href="/sizer"><i class="fa-solid fa-calculator me-2"></i>Position Sizer</a></li>
+        </ul>
+        <div class="p-3 bg-dark rounded-3 border border-secondary">
+            <span class="text-white-50 d-block small">Macro Regime Score</span>
+            <span class="fs-4 fw-bold text-success">{{ macro_score }}</span>
         </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <div class="main-content">
+        <h2 class="fw-bold text-white mb-1">Algorithmic Trading Signals</h2>
+        <p class="text-white-50 mb-4">Quantitative trade setups driven by cross-asset macro scoring models.</p>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card-custom">
+                    <span class="badge bg-success mb-2">LONG SETUP</span>
+                    <h4 class="text-white fw-bold">EUR/USD Structural Bullish</h4>
+                    <p class="text-white-50">Liquidity expansion and narrowing rate differentials favor upside movement.</p>
+                    <hr class="border-secondary">
+                    <div class="d-flex justify-content-between text-white">
+                        <span>Confidence: <strong class="text-success">84%</strong></span>
+                        <span>Timeframe: <strong>Swing / Multi-Week</strong></span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card-custom">
+                    <span class="badge bg-danger mb-2">SHORT SETUP</span>
+                    <h4 class="text-white fw-bold">USD/JPY Resistance Rejection</h4>
+                    <p class="text-white-50">Yield curve convergence limits further carry trade expansion.</p>
+                    <hr class="border-secondary">
+                    <div class="d-flex justify-content-between text-white">
+                        <span>Confidence: <strong class="text-danger">79%</strong></span>
+                        <span>Timeframe: <strong>Intraday / Swing</strong></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
