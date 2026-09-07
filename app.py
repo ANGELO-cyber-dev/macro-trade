@@ -158,8 +158,29 @@ def sizer():
 def tracker():
     return render_template("tracker.html", macro_score=calculate_macro_score(), active_page="tracker")
 
-@app.route("/community")
+@app.route("/community", methods=["GET", "POST"])
 def community():
+    if request.method == "POST":
+        author = request.form.get("author", "Anonymous Trader")
+        pair = request.form.get("pair", "EUR/USD")
+        bias = request.form.get("bias", "Bullish")
+        entry = request.form.get("entry", "0.0000")
+        target = request.form.get("target", "0.0000")
+        content = request.form.get("content", "")
+        
+        if content:
+            community_posts.insert(0, {
+                "id": len(community_posts) + 1,
+                "author": author,
+                "pair": pair,
+                "bias": bias,
+                "entry": entry,
+                "target": target,
+                "content": content,
+                "timestamp": "Just now"
+            })
+        return redirect(url_for("community"))
+        
     return render_template("community.html", macro_score=calculate_macro_score(), active_page="community", posts=community_posts)
 
 @app.route("/post_setup", methods=["POST"])
