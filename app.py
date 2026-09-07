@@ -31,7 +31,19 @@ def calculate_macro_score():
 
 @app.route("/")
 def index():
-    return render_template("index.html", macro_score=calculate_macro_score(), active_page="market")
+    live_assets = [
+        {"ticker": "EUR/USD", "name": "Euro / US Dollar", "price": "1.1045", "change": "+0.15%"},
+        {"ticker": "GBP/USD", "name": "British Pound / US Dollar", "price": "1.3120", "change": "+0.22%"},
+        {"ticker": "USD/JPY", "name": "US Dollar / Japanese Yen", "price": "146.85", "change": "-0.18%"},
+        {"ticker": "USD/CHF", "name": "US Dollar / Swiss Franc", "price": "0.8850", "change": "+0.05%"},
+        {"ticker": "USD/CAD", "name": "US Dollar / Canadian Dollar", "price": "1.3540", "change": "-0.12%"},
+        {"ticker": "XAU/USD", "name": "Spot Gold", "price": "2,520.40", "change": "+0.45%"},
+        {"ticker": "XAG/USD", "name": "Spot Silver", "price": "29.15", "change": "+0.60%"},
+        {"ticker": "BTC/USD", "name": "Bitcoin / US Dollar", "price": "59,400.00", "change": "+1.25%"},
+        {"ticker": "US30", "name": "Wall Street 30 Index", "price": "41,150.00", "change": "+0.35%"},
+        {"ticker": "NAS100", "name": "Nasdaq 100 Index", "price": "19,820.00", "change": "+0.78%"}
+    ]
+    return render_template("index.html", macro_score=calculate_macro_score(), active_page="market", assets=live_assets)
 
 @app.route("/indicators")
 def indicators():
