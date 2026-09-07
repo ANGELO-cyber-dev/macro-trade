@@ -2,13 +2,45 @@ from datetime import datetime
 from flask import Flask, jsonify, render_template
 from apscheduler.schedulers.background import BackgroundScheduler
 from database import SessionLocal, init_db
-from models import Instrument, MarketQuote
+from models import Instrument, MarketQuote, MacroIndicator, AssetClass
 import requests
 
 app = Flask(__name__)
 init_db()
 
-# Direct Yahoo Finance API mapping
+def seed_production_data():
+    db = SessionLocal()
+    if db.query(Instrument.id).first() is not None:
+        db.close()
+        return
+
+    print("Seeding initial production database...")
+    instruments = [
+        Instrument(ticker="EUR/USD", name="Euro / US Dollar", asset_class=AssetClass.FX),
+        Instrument(ticker="GBP/USD", name="British Pound / US Dollar", asset_class=AssetClass.FX),
+        Instrument(ticker="USD/JPY", name="US Dollar / Japanese Yen", asset_class=AssetClass.FX),
+        Instrument(ticker="GOLD", name="Gold Futures", asset_class=AssetClass.COMMODITIES),
+        Instrument(ticker="OIL", name="Crude Oil Futures", asset_class=AssetClass.COMMODITIES),
+        Instrument(ticker="BTC", name="Bitcoin", asset_class=AssetClass.CRYPTO),
+        Instrument(ticker="SPX", name="S&P 500 Index", asset_class=AssetClass.INDICES),
+    ]
+    
+    macro_indicators = [
+        MacroIndicator(series_id="CPIAUCSL", name="Consumer Price Index (CPI)", category="Inflation", frequency="Monthly"),
+        MacroIndicator(series_id="PAYEMS", name="Nonfarm Payrolls (NFP)", category="Labor", frequency="Monthly"),
+        MacroIndicator(series_id="UNRATE", name="Unemployment Rate", category="Labor", frequency="Monthly"),
+        MacroIndicator(series_id="GDP", name="Gross Domestic Product", category="Growth", frequency="Quarterly"),
+        MacroIndicator(series_id="M2SL", name="M2 Money Supply", category="Liquidity", frequency="Monthly")
+    ]
+    
+    db.add_all(instruments)
+    db.add_all(macro_indicators)
+    db.commit()
+    db.close()
+    print("Production database successfully seeded.")
+
+seed_production_data()
+
 TICKER_MAP = {
     "EUR/USD": "EURUSD=X",
     "GBP/USD": "GBPUSD=X",
@@ -20,10 +52,7 @@ TICKER_MAP = {
 }
 
 def background_live_sync():
-    """Lightweight background task to poll live market quotes via API."""
     db = SessionLocal()
-    print(f"[{datetime.utcnow().isoformat()}] Fetching live feeds via direct API...")
-    
     headers = {"User-Agent": "Mozilla/5.0"}
     
     for internal_ticker, yf_symbol in TICKER_MAP.items():
@@ -57,14 +86,13 @@ def background_live_sync():
                     source="YahooAPI"
                 ))
             db.commit()
-            print(f"Updated {internal_ticker}: {price} ({change:+.2f}%)")
         except Exception as e:
             db.rollback()
-            print(f"Sync error for {internal_ticker}: {e}")
             
     db.close()
 
-# Start background scheduler running every 5 minutes
+background_live_sync()
+
 scheduler = BackgroundScheduler()
 scheduler.add_job(func=background_live_sync, trigger="interval", minutes=5)
 scheduler.start()
