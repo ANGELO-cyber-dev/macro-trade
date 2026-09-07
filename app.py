@@ -47,8 +47,7 @@ def indicators():
 
 @app.route("/signals")
 def signals():
-    # Expanded trading signals featuring Forex, Gold, and Crypto
-    custom_signals = [
+    complete_signals = [
         {
             "type": "LONG SETUP",
             "badge_class": "success",
@@ -61,11 +60,47 @@ def signals():
         {
             "type": "LONG SETUP",
             "badge_class": "success",
+            "pair": "XAG/USD (Silver)",
+            "title": "Industrial & Precious Demand",
+            "desc": "Green energy manufacturing requirements coupled with gold parity momentum.",
+            "confidence": "80%",
+            "timeframe": "Swing"
+        },
+        {
+            "type": "LONG SETUP",
+            "badge_class": "success",
             "pair": "BTC/USD (Crypto)",
             "title": "Bitcoin Institutional Accumulation",
             "desc": "Strong ETF net inflows and macro liquidity expansion support bullish continuation.",
             "confidence": "81%",
             "timeframe": "Multi-Day"
+        },
+        {
+            "type": "LONG SETUP",
+            "badge_class": "success",
+            "pair": "EUR/USD",
+            "title": "Euro Area Consolidation",
+            "desc": "Narrower US-Eurozone GDP differentials supporting medium-term structural support.",
+            "confidence": "77%",
+            "timeframe": "Swing"
+        },
+        {
+            "type": "LONG SETUP",
+            "badge_class": "success",
+            "pair": "GBP/USD",
+            "title": "Cable Resiliency Test",
+            "desc": "Higher-timeframe technical support holds firm ahead of UK fiscal data releases.",
+            "confidence": "76%",
+            "timeframe": "Multi-Day"
+        },
+        {
+            "type": "SHORT SETUP",
+            "badge_class": "danger",
+            "pair": "USD/JPY",
+            "title": "Intervention Risk Watch",
+            "desc": "Wide interest rate differentials balanced against potential Bank of Japan rate shifts.",
+            "confidence": "72%",
+            "timeframe": "Intraday / Swing"
         },
         {
             "type": "SHORT SETUP",
@@ -93,9 +128,27 @@ def signals():
             "desc": "Dairy export pricing recovery and steady RBNZ hawkish stance drive Kiwi gains.",
             "confidence": "78%",
             "timeframe": "Swing / Multi-Week"
+        },
+        {
+            "type": "LONG SETUP",
+            "badge_class": "success",
+            "pair": "US30 (Wall Street 30)",
+            "title": "Blue-Chip Industrial Momentum",
+            "desc": "Corporate earnings resilience and soft-landing narrative boost equity indices.",
+            "confidence": "82%",
+            "timeframe": "Multi-Day"
+        },
+        {
+            "type": "LONG SETUP",
+            "badge_class": "success",
+            "pair": "NAS100 (Nasdaq)",
+            "title": "Tech Sector Liquidity Flow",
+            "desc": "AI infrastructure spending and growth stock cash flows drive upper channel expansion.",
+            "confidence": "85%",
+            "timeframe": "Swing"
         }
     ]
-    return render_template("signals.html", macro_score=calculate_macro_score(), active_page="signals", signals=custom_signals)
+    return render_template("signals.html", macro_score=calculate_macro_score(), active_page="signals", signals=complete_signals)
 
 @app.route("/sizer")
 def sizer():
