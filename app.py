@@ -1,6 +1,7 @@
 from datetime import datetime
 from flask import Flask, jsonify, render_template
 from apscheduler.schedulers.background import BackgroundScheduler
+from sqlalchemy.orm import joinedload
 from database import SessionLocal, init_db
 from models import Instrument, MarketQuote, MacroIndicator, AssetClass
 import requests
@@ -100,14 +101,14 @@ scheduler.start()
 @app.route("/")
 def index():
     db = SessionLocal()
-    quotes = db.query(MarketQuote).all()
+    quotes = db.query(MarketQuote).options(joinedload(MarketQuote.instrument)).all()
     db.close()
     return render_template("index.html", quotes=quotes)
 
 @app.route("/api/v1/quotes")
 def api_quotes():
     db = SessionLocal()
-    quotes = db.query(MarketQuote).all()
+    quotes = db.query(MarketQuote).options(joinedload(MarketQuote.instrument)).all()
     data = [{
         "ticker": q.instrument.ticker,
         "price": float(q.price),
