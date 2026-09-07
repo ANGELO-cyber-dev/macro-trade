@@ -1,33 +1,33 @@
 from flask import Flask, render_template, request, redirect, url_for
-import random
 
 app = Flask(__name__)
 
+# In-memory store for community posts to ensure persistence during session
 community_posts = [
     {
         "id": 1,
         "author": "ANGELOFX",
-        "pair": "GBP/USD",
+        "pair": "XAU/USD",
         "bias": "Bullish",
-        "entry": "1.2650",
-        "target": "1.2800",
-        "content": "Bouncing off the 4H macro support zone with strong bullish divergence on RSI.",
+        "entry": "2510.00",
+        "target": "2550.00",
+        "content": "Central bank accumulation is driving structural breakouts on the daily timeframe.",
         "timestamp": "2 hours ago"
     },
     {
         "id": 2,
-        "author": "LagosTrader",
+        "author": "MacroTrader_NG",
         "pair": "EUR/USD",
-        "bias": "Bearish",
-        "entry": "1.0850",
-        "target": "1.0750",
-        "content": "Rejection at daily resistance following strong US NFP employment data release.",
+        "bias": "Bullish",
+        "entry": "1.1020",
+        "target": "1.1150",
+        "content": "Narrower US-Eurozone GDP differentials supporting medium-term support.",
         "timestamp": "4 hours ago"
     }
 ]
 
 def calculate_macro_score():
-    return random.randint(68, 85)
+    return 78
 
 @app.route("/")
 def index():
@@ -195,37 +195,13 @@ def community():
         
     return render_template("community.html", macro_score=calculate_macro_score(), active_page="community", posts=community_posts)
 
-@app.route("/post_setup", methods=["POST"])
-def post_setup():
-    author = request.form.get("author", "Anonymous Trader")
-    pair = request.form.get("pair", "EUR/USD")
-    bias = request.form.get("bias", "Bullish")
-    entry = request.form.get("entry", "0.0000")
-    target = request.form.get("target", "0.0000")
-    content = request.form.get("content", "")
-    
-    if content:
-        community_posts.insert(0, {
-            "id": len(community_posts) + 1,
-            "author": author,
-            "pair": pair,
-            "bias": bias,
-            "entry": entry,
-            "target": target,
-            "content": content,
-            "timestamp": "Just now"
-        })
-    return redirect(url_for("community"))
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
-
-
-@app.errorhandler(404)
-def page_not_found(e):
-    return redirect(url_for("community"))
-
-
 @app.route("/comn")
 def comn_alias():
     return redirect(url_for("community"))
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return redirect(url_for("index"))
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)
