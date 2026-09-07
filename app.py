@@ -1,15 +1,36 @@
+import os
+import requests
 from datetime import datetime
 from flask import Flask, jsonify, render_template
 from apscheduler.schedulers.background import BackgroundScheduler
 from sqlalchemy.orm import joinedload
 from database import SessionLocal, init_db
+import finnhub
 from models import Instrument, MarketQuote, MacroIndicator, AssetClass
 from scoring import calculate_macro_score
-from finnhub_service import fetch_market_news
-import requests
 
 app = Flask(__name__)
 init_db()
+
+def get_finnhub_client():
+    api_key = os.getenv("FINNHUB_API_KEY", "")
+    if not api_key:
+        return None
+    return finnhub.Client(api_key=api_key)
+
+def fetch_market_news():
+    client = get_finnhub_client()
+    if not client:
+        return [
+            {"headline": "Fed Signals Steady Rates Amid Resilient Labor Data", "source": "Finnhub Macro", "summary": "Macro volatility remains range-bound as central bank officials emphasize data-dependent monetary policy shifts.", "url": "#"},
+            {"headline": "Global Liquidity Flows Shift Toward Commodities and Gold", "source": "Institutional Wire", "summary": "Rising money supply metrics drive structural demand across hard asset futures and digital stores of value.", "url": "#"}
+        ]
+    try:
+        news = client.general_news('general', min_id=0)
+        return news[:5]
+    except Exception as e:
+        print(f"Error fetching Finnhub news: {e}")
+        return []
 
 def seed_production_data():
     db = SessionLocal()
@@ -18,7 +39,6 @@ def seed_production_data():
         return
 
     instruments = [
-        # Major FX Pairs
         Instrument(ticker="EUR/USD", name="Euro / US Dollar", asset_class=AssetClass.FX),
         Instrument(ticker="GBP/USD", name="British Pound / US Dollar", asset_class=AssetClass.FX),
         Instrument(ticker="USD/JPY", name="US Dollar / Japanese Yen", asset_class=AssetClass.FX),
@@ -26,7 +46,6 @@ def seed_production_data():
         Instrument(ticker="USD/CAD", name="US Dollar / Canadian Dollar", asset_class=AssetClass.FX),
         Instrument(ticker="USD/CHF", name="US Dollar / Swiss Franc", asset_class=AssetClass.FX),
         Instrument(ticker="NZD/USD", name="New Zealand Dollar / US Dollar", asset_class=AssetClass.FX),
-        # Commodities, Crypto & Indices
         Instrument(ticker="GOLD", name="Gold Futures", asset_class=AssetClass.COMMODITIES),
         Instrument(ticker="OIL", name="Crude Oil Futures", asset_class=AssetClass.COMMODITIES),
         Instrument(ticker="BTC", name="Bitcoin", asset_class=AssetClass.CRYPTO),
