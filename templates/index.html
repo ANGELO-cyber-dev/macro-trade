@@ -18,22 +18,24 @@
         .badge-bullish { background-color: rgba(63, 185, 80, 0.15); color: #3fb950; border: 1px solid #3fb950; }
         .badge-bearish { background-color: rgba(248, 81, 73, 0.15); color: #f85149; border: 1px solid #f85149; }
         .badge-neutral { background-color: rgba(210, 153, 34, 0.15); color: #d29922; border: 1px solid #d29922; }
+        .progress { background-color: #21262d; height: 10px; }
     </style>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark px-3 py-3">
         <div class="container-fluid">
-            <a class="navbar-brand fw-bold fs-6" href="/">MACRO TRADE</a>
-            <span class="badge bg-success ms-2">LIVE</span>
+            <!-- Menu items on the top left -->
+            <a class="navbar-brand fw-bold fs-6 me-4" href="/">MACRO TRADE</a>
             <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
-                <ul class="navbar-nav mt-2 mt-lg-0">
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item"><a class="nav-link active" href="/">Market Feeds</a></li>
                     <li class="nav-item"><a class="nav-link" href="/indicators">Macro Indicators</a></li>
                     <li class="nav-item"><a class="nav-link" href="/signals">Trade Signals</a></li>
                 </ul>
+                <span class="badge bg-success">LIVE SYSTEM</span>
             </div>
         </div>
     </nav>
@@ -76,6 +78,81 @@
             </div>
         </div>
 
+        <div class="row g-4 mb-4">
+            <!-- Position Sizing Calculator Section -->
+            <div class="col-lg-6">
+                <div class="card shadow-sm p-4 h-100">
+                    <h5 class="fw-semibold text-light mb-3">Institutional Position Sizer</h5>
+                    <form id="sizingForm">
+                        <div class="mb-3">
+                            <label class="form-label text-secondary small">Account Balance ($)</label>
+                            <input type="number" id="accBalance" class="form-control bg-dark text-light border-secondary" value="100000">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-secondary small">Risk Tolerance (%)</label>
+                            <input type="number" id="riskPct" class="form-control bg-dark text-light border-secondary" value="1.0" step="0.1">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-secondary small">Stop Loss (Pips / Points)</label>
+                            <input type="number" id="stopLoss" class="form-control bg-dark text-light border-secondary" value="50">
+                        </div>
+                        <div class="p-3 bg-dark rounded border border-secondary text-center">
+                            <span class="text-secondary small d-block">Recommended Position Size</span>
+                            <strong id="resultLotSize" class="fs-4 text-success">2.00 Lots</strong>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Upcoming News & FRED News Strength Chart Interface -->
+            <div class="col-lg-6">
+                <div class="card shadow-sm p-4 h-100">
+                    <h5 class="fw-semibold text-light mb-3">Upcoming FRED News & Impact Strength</h5>
+                    <p class="text-muted small mb-3">Projected market volatility and structural strength rating per macro release.</p>
+                    
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between small mb-1">
+                            <span>Consumer Price Index (CPI YoY)</span>
+                            <span class="text-warning fw-bold">Impact: 92% (High Volatility)</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar bg-danger" style="width: 92%"></div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between small mb-1">
+                            <span>Nonfarm Payrolls (NFP)</span>
+                            <span class="text-info fw-bold">Impact: 85% (Strong Trend)</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar bg-info" style="width: 85%"></div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between small mb-1">
+                            <span>FOMC Rate Decision</span>
+                            <span class="text-success fw-bold">Impact: 98% (Max Regime Shift)</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar bg-success" style="width: 98%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="d-flex justify-content-between small mb-1">
+                            <span>M2 Money Supply Liquidity Print</span>
+                            <span class="text-secondary fw-bold">Impact: 60% (Moderate)</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar bg-secondary" style="width: 60%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h5 class="fw-semibold text-light mb-0">Real-Time Market Feeds</h5>
             <span class="text-muted small">Auto-syncing every 5m</span>
@@ -100,7 +177,7 @@
                             <td class="text-muted small">{{ q.instrument.name }}</td>
                             <td>{{ "%.4f"|format(q.price) }}</td>
                             <td class="{{ 'positive' if q.change_24h >= 0 else 'negative' }}">
-                                {{ "%+.2f"|format(q.change_24h) %>%
+                                {{ "%+.2f"|format(q.change_24h) }}%
                             </td>
                             <td class="text-muted small">{{ q.updated_at.strftime('%H:%M:%S') }}</td>
                         </tr>
@@ -115,6 +192,28 @@
         </div>
     </div>
 
+    <script>
+        // Dynamic position sizing calculation
+        const balanceInput = document.getElementById('accBalance');
+        const riskInput = document.getElementById('riskPct');
+        const slInput = document.getElementById('stopLoss');
+        const resultDisplay = document.getElementById('resultLotSize');
+
+        function calculateSizing() {
+            const balance = parseFloat(balanceInput.value) || 0;
+            const riskPct = parseFloat(riskInput.value) || 0;
+            const sl = parseFloat(slInput.value) || 1;
+            
+            const riskAmount = balance * (riskPct / 100);
+            const lotSize = riskAmount / (sl * 10); // Standard institutional rough estimation formula
+            resultDisplay.textContent = lotSize.toFixed(2) + " Lots ($" + riskAmount.toFixed(2) + " Risk)";
+        }
+
+        [balanceInput, riskInput, slInput].forEach(input => {
+            input.addEventListener('input', calculateSizing);
+        });
+        calculateSizing();
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
