@@ -121,7 +121,7 @@ scheduler.start()
 def index():
     db = SessionLocal()
     quotes = db.query(MarketQuote).options(joinedload(MarketQuote.instrument)).all()
-    sample_macro_score = calculate_macro_score(inflation_val=0.3, labor_val=0.2, growth_val=0.1, liquidity_val=0.4)
+    sample_macro_score = calculate_macro_score()
     market_news = fetch_market_news()
     db.close()
     return render_template("index.html", quotes=quotes, macro_score=sample_macro_score, market_news=market_news, active_page="market")
@@ -130,14 +130,19 @@ def index():
 def indicators():
     db = SessionLocal()
     indicators_list = db.query(MacroIndicator).all()
-    sample_macro_score = calculate_macro_score(inflation_val=0.3, labor_val=0.2, growth_val=0.1, liquidity_val=0.4)
+    sample_macro_score = calculate_macro_score()
     db.close()
     return render_template("indicators.html", indicators=indicators_list, macro_score=sample_macro_score, active_page="indicators")
 
 @app.route("/signals")
 def signals():
-    sample_macro_score = calculate_macro_score(inflation_val=0.3, labor_val=0.2, growth_val=0.1, liquidity_val=0.4)
+    sample_macro_score = calculate_macro_score()
     return render_template("signals.html", macro_score=sample_macro_score, active_page="signals")
+
+@app.route("/sizer")
+def sizer():
+    sample_macro_score = calculate_macro_score()
+    return render_template("sizer.html", macro_score=sample_macro_score, active_page="sizer")
 
 @app.route("/api/v1/quotes")
 def api_quotes():
@@ -153,4 +158,4 @@ def api_quotes():
     return jsonify(data)
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=False)
