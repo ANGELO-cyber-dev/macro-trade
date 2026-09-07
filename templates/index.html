@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body { background-color: #0b0f19; color: #ffffff; font-family: system-ui, -apple-system, sans-serif; overflow-x: hidden; }
-        .sidebar { width: 240px; height: 100vh; position: fixed; top: 0; left: 0; background: #111827; border-right: 1px solid #1f2937; padding: 20px; z-index: 100; }
+        .sidebar { width: 240px; height: 100vh; position: fixed; top: 0; left: 0; background: #111827; border-right: 1px solid #1f2937; padding: 20px; z-index: 1000; transition: transform 0.3s ease; }
         .main-content { margin-left: 240px; padding: 25px; }
         .nav-link { color: #ffffff; border-radius: 8px; margin-bottom: 5px; font-weight: 500; }
         .nav-link:hover, .nav-link.active { color: #ffffff; background: #1f2937; }
@@ -16,15 +16,26 @@
         .table { color: #ffffff; font-size: 0.9rem; }
         .table-dark { background-color: #111827; color: #ffffff; }
         .text-white-50 { color: #d1d5db !important; }
+        .mobile-header { display: none; background: #111827; border-bottom: 1px solid #1f2937; padding: 15px 20px; position: sticky; top: 0; z-index: 999; }
         @media (max-width: 768px) {
-            .sidebar { width: 100%; height: auto; position: relative; }
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.mobile-open { transform: translateX(0); }
             .main-content { margin-left: 0; padding: 15px; }
+            .mobile-header { display: flex; justify-content: space-between; align-items: center; }
         }
     </style>
 </head>
 <body>
-    <div class="sidebar d-flex flex-column">
-        <h4 class="text-white fw-bold mb-4"><i class="fa-solid fa-chart-line text-primary me-2"></i>MacroTrade</h4>
+    <div class="mobile-header">
+        <h4 class="text-white fw-bold mb-0"><i class="fa-solid fa-chart-line text-primary me-2"></i>MacroTrade</h4>
+        <button class="btn btn-dark border-secondary text-white" onclick="toggleMenu()"><i class="fa-solid fa-bars"></i> Menu</button>
+    </div>
+
+    <div class="sidebar d-flex flex-column" id="appSidebar">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="text-white fw-bold mb-0"><i class="fa-solid fa-chart-line text-primary me-2"></i>MacroTrade</h4>
+            <button class="btn btn-sm btn-dark text-white d-md-none" onclick="toggleMenu()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
         <ul class="nav flex-column flex-grow-1">
             <li class="nav-item"><a class="nav-link {% if active_page == 'market' %}active{% endif %}" href="/"><i class="fa-solid fa-globe me-2"></i>Market Dashboard</a></li>
             <li class="nav-item"><a class="nav-link {% if active_page == 'indicators' %}active{% endif %}" href="/indicators"><i class="fa-solid fa-chart-bar me-2"></i>Macro Indicators</a></li>
@@ -94,6 +105,10 @@
     </div>
 
     <script>
+        function toggleMenu() {
+            document.getElementById('appSidebar').classList.toggle('mobile-open');
+        }
+
         setInterval(async () => {
             try {
                 let res = await fetch('/api/v1/quotes');
