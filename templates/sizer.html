@@ -13,8 +13,8 @@
         .nav-link { color: #ffffff; border-radius: 8px; margin-bottom: 5px; font-weight: 500; }
         .nav-link:hover, .nav-link.active { color: #ffffff; background: #1f2937; }
         .card-custom { background: #111827; border: 1px solid #1f2937; border-radius: 12px; padding: 20px; color: #ffffff; }
-        .form-control { background: #1f2937; border: 1px solid #374151; color: #fff; }
-        .form-control:focus { background: #1f2937; border-color: #3b82f6; color: #fff; box-shadow: none; }
+        .form-control, .form-select { background: #1f2937; border: 1px solid #374151; color: #fff; }
+        .form-control:focus, .form-select:focus { background: #1f2937; border-color: #3b82f6; color: #fff; box-shadow: none; }
         .text-white-50 { color: #d1d5db !important; }
         .mobile-header { display: none; background: #111827; border-bottom: 1px solid #1f2937; padding: 15px 20px; position: sticky; top: 0; z-index: 999; }
         @media (max-width: 768px) {
@@ -42,7 +42,11 @@
             <li class="nav-item"><a class="nav-link {% if active_page == 'signals' %}active{% endif %}" href="/signals"><i class="fa-solid fa-bolt me-2"></i>Trading Signals</a></li>
             <li class="nav-item"><a class="nav-link {% if active_page == 'sizer' %}active{% endif %}" href="/sizer"><i class="fa-solid fa-calculator me-2"></i>Position Sizer</a></li>
         </ul>
-        <div class="p-3 bg-dark rounded-3 border border-secondary mt-3">
+        <div class="p-3 bg-dark rounded-3 border border-secondary mt-2 mb-2">
+            <span class="text-white-50 d-block small">Founder & Architect</span>
+            <span class="fs-6 fw-bold text-primary">ANGELOFX</span>
+        </div>
+        <div class="p-3 bg-dark rounded-3 border border-secondary">
             <span class="text-white-50 d-block small">Macro Regime Score</span>
             <span class="fs-4 fw-bold text-success">{{ macro_score }} / 100</span>
         </div>
@@ -51,29 +55,59 @@
     <div class="main-content">
         <div class="mb-4">
             <h2 class="fw-bold text-white mb-1">Institutional Position Sizer</h2>
-            <p class="text-white-50 mb-0">Calculate precise risk parameters and lot sizing for institutional execution.</p>
+            <p class="text-white-50 mb-0">Multi-asset lot calculation for FX majors, commodities (XAUUSD), and indices.</p>
         </div>
 
         <div class="row">
-            <div class="col-lg-6">
+            <div class="col-lg-7">
                 <div class="card-custom">
                     <form id="sizerForm">
                         <div class="mb-3">
-                            <label class="form-label text-white-50">Account Balance ($)</label>
-                            <input type="number" class="form-control" id="accBalance" value="100000" oninput="calculatePosition()">
+                            <label class="form-label text-white-50">Select Asset / Currency Pair</label>
+                            <select class="form-select" id="assetSymbol" onchange="calculatePosition()">
+                                <option value="EUR/USD">EUR/USD</option>
+                                <option value="GBP/USD">GBP/USD</option>
+                                <option value="USD/JPY">USD/JPY</option>
+                                <option value="AUD/USD">AUD/USD</option>
+                                <option value="USD/CAD">USD/CAD</option>
+                                <option value="USD/CHF">USD/CHF</option>
+                                <option value="NZD/USD">NZD/USD</option>
+                                <option value="XAUUSD" selected>XAUUSD (Gold)</option>
+                                <option value="OIL">OIL (Crude)</option>
+                                <option value="BTC">BTC (Bitcoin)</option>
+                                <option value="SPX">SPX (S&P 500)</option>
+                            </select>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-white-50">Account Balance ($)</label>
+                                <input type="number" class="form-control" id="accBalance" value="100000" oninput="calculatePosition()">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-white-50">Risk Tolerance (%)</label>
+                                <input type="number" step="0.1" class="form-control" id="riskPct" value="1.0" oninput="calculatePosition()">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-white-50">Entry Price</label>
+                                <input type="number" step="any" class="form-control" id="entryPrice" value="2500.00" oninput="calculatePosition()">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-white-50">Stop Loss Price</label>
+                                <input type="number" step="any" class="form-control" id="slPrice" value="2490.00" oninput="calculatePosition()">
+                            </div>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label text-white-50">Risk Tolerance (%)</label>
-                            <input type="number" step="0.1" class="form-control" id="riskPct" value="1.0" oninput="calculatePosition()">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label text-white-50">Stop Loss (Pips / Points)</label>
-                            <input type="number" class="form-control" id="stopPips" value="50" oninput="calculatePosition()">
+                            <label class="form-label text-white-50">Take Profit Price (Optional)</label>
+                            <input type="number" step="any" class="form-control" id="tpPrice" value="2530.00" oninput="calculatePosition()">
                         </div>
                     </form>
+
                     <div class="mt-4 p-3 bg-dark rounded border border-secondary text-center">
                         <span class="text-white-50 small d-block mb-1">Recommended Position Size</span>
-                        <h3 id="resultOutput" class="text-success fw-bold mb-0">2.00 Lots ($1000.00 Risk)</h3>
+                        <h3 id="resultOutput" class="text-success fw-bold mb-1">--</h3>
+                        <div id="riskRewardOutput" class="text-white-50 small"></div>
                     </div>
                 </div>
             </div>
@@ -86,15 +120,60 @@
         }
 
         function calculatePosition() {
+            let asset = document.getElementById('assetSymbol').value;
             let balance = parseFloat(document.getElementById('accBalance').value) || 0;
             let riskPct = parseFloat(document.getElementById('riskPct').value) || 0;
-            let stopPips = parseFloat(document.getElementById('stopPips').value) || 1;
+            let entry = parseFloat(document.getElementById('entryPrice').value) || 0;
+            let sl = parseFloat(document.getElementById('slPrice').value) || 0;
+            let tp = parseFloat(document.getElementById('tpPrice').value) || 0;
+
+            if (balance <= 0 || riskPct <= 0 || entry <= 0 || sl <= 0) {
+                document.getElementById('resultOutput').innerText = "Invalid Inputs";
+                document.getElementById('riskRewardOutput').innerText = "";
+                return;
+            }
 
             let dollarRisk = balance * (riskPct / 100);
-            let lotSize = dollarRisk / (stopPips * 10);
+            let priceDiff = Math.abs(entry - sl);
+            if (priceDiff === 0) return;
+
+            let lotSize = 0;
+            // Standard contract sizing rules per asset class
+            if (asset.includes("/USD") || asset === "USD/JPY" || asset === "USD/CAD" || asset === "USD/CHF") {
+                // Forex standard lot = 100,000 units. Pip value for 1 lot ~ $10 if quote currency is USD
+                let pipsRisk = priceDiff * (asset === "USD/JPY" ? 100 : 10000);
+                lotSize = dollarRisk / (pipsRisk * (asset === "USD/JPY" ? 10 : 10)); 
+                // Simplified standard Forex lot formula: Risk / (distance in points * pip value per standard lot)
+                let pipValuePerStandardLot = 10; 
+                let pips = priceDiff * (asset === "USD/JPY" ? 100 : 10000);
+                lotSize = dollarRisk / (pips * pipValuePerStandardLot);
+            } else if (asset === "XAUUSD") {
+                // Gold: 1 standard lot = 100 oz. $1 move per oz = $100 per lot.
+                let dollarRiskPerLot = priceDiff * 100;
+                lotSize = dollarRisk / dollarRiskPerLot;
+            } else if (asset === "OIL") {
+                // Crude Oil: 1 contract = 1,000 barrels. $1 move = $1,000 per lot.
+                let dollarRiskPerLot = priceDiff * 1000;
+                lotSize = dollarRisk / dollarRiskPerLot;
+            } else {
+                // Indices / Crypto generalized
+                let dollarRiskPerLot = priceDiff;
+                lotSize = dollarRisk / dollarRiskPerLot;
+            }
 
             document.getElementById('resultOutput').innerText = lotSize.toFixed(2) + " Lots ($" + dollarRisk.toFixed(2) + " Risk)";
+
+            if (tp > 0) {
+                let rewardDiff = Math.abs(tp - entry);
+                let rrRatio = (rewardDiff / priceDiff).toFixed(2);
+                document.getElementById('riskRewardOutput').innerText = "Risk-to-Reward Ratio: 1 : " + rrRatio;
+            } else {
+                document.getElementById('riskRewardOutput').innerText = "";
+            }
         }
+
+        // Run initial calculation on load
+        window.onload = calculatePosition;
     </script>
 </body>
 </html>
