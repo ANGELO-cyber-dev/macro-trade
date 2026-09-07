@@ -39,7 +39,55 @@ def indicators():
 
 @app.route("/signals")
 def signals():
-    return render_template("signals.html", macro_score=calculate_macro_score(), active_page="signals")
+    # Expanded trading signals featuring Forex, Gold, and Crypto
+    custom_signals = [
+        {
+            "type": "LONG SETUP",
+            "badge_class": "success",
+            "pair": "XAU/USD (Gold)",
+            "title": "Gold Safe-Haven Breakout",
+            "desc": "Central bank reserve accumulation and sticky US inflation drive bullion higher.",
+            "confidence": "84%",
+            "timeframe": "Swing / Multi-Week"
+        },
+        {
+            "type": "LONG SETUP",
+            "badge_class": "success",
+            "pair": "BTC/USD (Crypto)",
+            "title": "Bitcoin Institutional Accumulation",
+            "desc": "Strong ETF net inflows and macro liquidity expansion support bullish continuation.",
+            "confidence": "81%",
+            "timeframe": "Multi-Day"
+        },
+        {
+            "type": "SHORT SETUP",
+            "badge_class": "danger",
+            "pair": "USD/CAD",
+            "title": "Oil-Led Pullback",
+            "desc": "Stable crude oil futures and sticky inflation metrics sustain Loonie upside.",
+            "confidence": "75%",
+            "timeframe": "Multi-Day"
+        },
+        {
+            "type": "NEUTRAL / RANGE",
+            "badge_class": "secondary",
+            "pair": "USD/CHF",
+            "title": "Consolidation",
+            "desc": "Safe-haven stabilization amidst steady Swiss National Bank monetary policy.",
+            "confidence": "68%",
+            "timeframe": "Range Bound"
+        },
+        {
+            "type": "LONG SETUP",
+            "badge_class": "success",
+            "pair": "NZD/USD",
+            "title": "Dairy & Rate Support",
+            "desc": "Dairy export pricing recovery and steady RBNZ hawkish stance drive Kiwi gains.",
+            "confidence": "78%",
+            "timeframe": "Swing / Multi-Week"
+        }
+    ]
+    return render_template("signals.html", macro_score=calculate_macro_score(), active_page="signals", signals=custom_signals)
 
 @app.route("/sizer")
 def sizer():

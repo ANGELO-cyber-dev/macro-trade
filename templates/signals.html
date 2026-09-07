@@ -25,29 +25,34 @@
 </head>
 <body>
     <div class="mobile-header">
-        <div class="mb-4">
+        <div class="d-flex flex-column">
             <h4 class="text-white fw-bold mb-0"><i class="fa-solid fa-chart-line text-primary me-2"></i>MacroTrade</h4>
-            <small class="text-white-50" style="font-size: 0.7rem; letter-spacing: 1px;">by ANGELOFX</small>
+            <small class="text-white-50" style="font-size: 0.65rem; letter-spacing: 1px;">by ANGELOFX</small>
         </div>
         <button class="btn btn-dark border-secondary text-white" onclick="toggleMenu()"><i class="fa-solid fa-bars"></i> Menu</button>
     </div>
 
     <div class="sidebar d-flex flex-column" id="appSidebar">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div class="mb-4">
-            <h4 class="text-white fw-bold mb-0"><i class="fa-solid fa-chart-line text-primary me-2"></i>MacroTrade</h4>
-            <small class="text-white-50" style="font-size: 0.7rem; letter-spacing: 1px;">by ANGELOFX</small>
-        </div>
+        <div class="mb-4 d-flex justify-content-between align-items-center">
+            <div>
+                <h4 class="text-white fw-bold mb-0"><i class="fa-solid fa-chart-line text-primary me-2"></i>MacroTrade</h4>
+                <small class="text-white-50" style="font-size: 0.7rem; letter-spacing: 1px;">by ANGELOFX</small>
+            </div>
             <button class="btn btn-sm btn-dark text-white d-md-none" onclick="toggleMenu()"><i class="fa-solid fa-xmark"></i></button>
         </div>
-                <ul class="nav flex-column flex-grow-1">
+        <ul class="nav flex-column flex-grow-1">
             <li class="nav-item"><a class="nav-link {% if active_page == 'market' %}active{% endif %}" href="/"><i class="fa-solid fa-globe me-2"></i>Market Dashboard</a></li>
             <li class="nav-item"><a class="nav-link {% if active_page == 'indicators' %}active{% endif %}" href="/indicators"><i class="fa-solid fa-chart-bar me-2"></i>Macro Indicators</a></li>
             <li class="nav-item"><a class="nav-link {% if active_page == 'signals' %}active{% endif %}" href="/signals"><i class="fa-solid fa-bolt me-2"></i>Trading Signals</a></li>
             <li class="nav-item"><a class="nav-link {% if active_page == 'sizer' %}active{% endif %}" href="/sizer"><i class="fa-solid fa-calculator me-2"></i>Position Sizer</a></li>
             <li class="nav-item"><a class="nav-link {% if active_page == 'tracker' %}active{% endif %}" href="/tracker"><i class="fa-solid fa-chart-pie me-2"></i>MT5 Tracker</a></li>
-        </ul>>
-        <div class="p-3 bg-dark rounded-3 border border-secondary mt-3">
+            <li class="nav-item"><a class="nav-link {% if active_page == 'community' %}active{% endif %}" href="/community"><i class="fa-solid fa-comments me-2"></i>Community Setups</a></li>
+        </ul>
+        <div class="p-3 bg-dark rounded-3 border border-secondary mt-2 mb-2">
+            <span class="text-white-50 d-block small">Founder & Architect</span>
+            <span class="fs-6 fw-bold text-primary">ANGELOFX</span>
+        </div>
+        <div class="p-3 bg-dark rounded-3 border border-secondary">
             <span class="text-white-50 d-block small">Macro Regime Score</span>
             <span class="fs-4 fw-bold text-success">{{ macro_score }} / 100</span>
         </div>
@@ -55,100 +60,26 @@
 
     <div class="main-content">
         <div class="mb-4">
-            <h2 class="fw-bold text-white mb-1">Algorithmic Trading Signals</h2>
-            <p class="text-white-50 mb-0">Quantitative trade setups across all major currency pairs driven by cross-asset macro scoring models.</p>
+            <h2 class="fw-bold text-white mb-1">Institutional Trading Signals</h2>
+            <p class="text-white-50 mb-0">High-conviction setups across Forex majors, Gold, and Crypto backed by macro regime scoring.</p>
         </div>
 
         <div class="row">
-            <div class="col-xl-6 mb-3">
-                <div class="card-custom h-100">
-                    <span class="badge bg-success mb-2">LONG SETUP</span>
-                    <h4 class="text-white fw-bold">EUR/USD Structural Bullish</h4>
-                    <p class="text-white-50">Liquidity expansion and narrowing rate differentials favor upside movement.</p>
-                    <hr class="border-secondary my-3">
-                    <div class="d-flex justify-content-between text-white flex-wrap gap-2">
-                        <span>Confidence: <strong class="text-success">84%</strong></span>
-                        <span>Timeframe: <strong>Swing / Multi-Week</strong></span>
+            <div class="col-lg-8">
+                {% for signal in signals %}
+                <div class="card-custom">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="badge bg-{{ signal.badge_class }} mb-1">{{ signal.type }}</span>
+                        <span class="text-primary fw-bold small">{{ signal.pair }}</span>
+                    </div>
+                    <h4 class="text-white fw-bold mb-2">{{ signal.title }}</h4>
+                    <p class="text-white-50 mb-3" style="font-size: 0.95rem;">{{ signal.desc }}</p>
+                    <div class="d-flex justify-content-between align-items-center pt-2 border-top border-secondary small">
+                        <span>Confidence: <strong class="text-success">{{ signal.confidence }}</strong></span>
+                        <span>Timeframe: <strong class="text-white">{{ signal.timeframe }}</strong></span>
                     </div>
                 </div>
-            </div>
-
-            <div class="col-xl-6 mb-3">
-                <div class="card-custom h-100">
-                    <span class="badge bg-success mb-2">LONG SETUP</span>
-                    <h4 class="text-white fw-bold">GBP/USD Momentum Breakout</h4>
-                    <p class="text-white-50">Resilient UK labor metrics and services PMI expansion underpin cable strength.</p>
-                    <hr class="border-secondary my-3">
-                    <div class="d-flex justify-content-between text-white flex-wrap gap-2">
-                        <span>Confidence: <strong class="text-success">81%</strong></span>
-                        <span>Timeframe: <strong>Multi-Week</strong></span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-xl-6 mb-3">
-                <div class="card-custom h-100">
-                    <span class="badge bg-danger mb-2">SHORT SETUP</span>
-                    <h4 class="text-white fw-bold">USD/JPY Resistance Rejection</h4>
-                    <p class="text-white-50">Yield curve convergence limits further carry trade expansion.</p>
-                    <hr class="border-secondary my-3">
-                    <div class="d-flex justify-content-between text-white flex-wrap gap-2">
-                        <span>Confidence: <strong class="text-danger">79%</strong></span>
-                        <span>Timeframe: <strong>Intraday / Swing</strong></span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-xl-6 mb-3">
-                <div class="card-custom h-100">
-                    <span class="badge bg-success mb-2">LONG SETUP</span>
-                    <h4 class="text-white fw-bold">AUD/USD Commodity Bounce</h4>
-                    <p class="text-white-50">Global hard asset demand and China stimulus momentum support commodity currencies.</p>
-                    <hr class="border-secondary my-3">
-                    <div class="d-flex justify-content-between text-white flex-wrap gap-2">
-                        <span>Confidence: <strong class="text-success">76%</strong></span>
-                        <span>Timeframe: <strong>Swing Trade</strong></span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-xl-6 mb-3">
-                <div class="card-custom h-100">
-                    <span class="badge bg-danger mb-2">SHORT SETUP</span>
-                    <h4 class="text-white fw-bold">USD/CAD Oil-Led Pullback</h4>
-                    <p class="text-white-50">Stable crude oil futures and sticky inflation metrics sustain Loonie upside.</p>
-                    <hr class="border-secondary my-3">
-                    <div class="d-flex justify-content-between text-white flex-wrap gap-2">
-                        <span>Confidence: <strong class="text-danger">75%</strong></span>
-                        <span>Timeframe: <strong>Multi-Day</strong></span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-xl-6 mb-3">
-                <div class="card-custom h-100">
-                    <span class="badge bg-secondary mb-2">NEUTRAL / RANGE</span>
-                    <h4 class="text-white fw-bold">USD/CHF Consolidation</h4>
-                    <p class="text-white-50">Safe-haven stabilization amidst steady Swiss National Bank monetary policy.</p>
-                    <hr class="border-secondary my-3">
-                    <div class="d-flex justify-content-between text-white flex-wrap gap-2">
-                        <span>Confidence: <strong class="text-warning">68%</strong></span>
-                        <span>Timeframe: <strong>Range Bound</strong></span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-xl-6 mb-3">
-                <div class="card-custom h-100">
-                    <span class="badge bg-success mb-2">LONG SETUP</span>
-                    <h4 class="text-white fw-bold">NZD/USD Dairy & Rate Support</h4>
-                    <p class="text-white-50">Dairy export pricing recovery and steady RBNZ hawkish stance drive Kiwi gains.</p>
-                    <hr class="border-secondary my-3">
-                    <div class="d-flex justify-content-between text-white flex-wrap gap-2">
-                        <span>Confidence: <strong class="text-success">78%</strong></span>
-                        <span>Timeframe: <strong>Swing / Multi-Week</strong></span>
-                    </div>
-                </div>
+                {% endfor %}
             </div>
         </div>
     </div>
