@@ -91,18 +91,22 @@ scheduler.start()
 def index():
     db = SessionLocal()
     quotes = db.query(MarketQuote).options(joinedload(MarketQuote.instrument)).all()
-    
-    # Generate mock macro scoring breakdown for demonstration of the transparent engine
     sample_macro_score = calculate_macro_score(inflation_val=0.3, labor_val=0.2, growth_val=0.1, liquidity_val=0.4)
-    
     db.close()
-    return render_template("index.html", quotes=quotes, macro_score=sample_macro_score)
+    return render_template("index.html", quotes=quotes, macro_score=sample_macro_score, active_page="market")
 
-@app.route("/api/v1/scoring")
-def api_scoring():
-    # Transparent API endpoint exposing macro score metrics
-    score_data = calculate_macro_score(inflation_val=0.3, labor_val=0.2, growth_val=0.1, liquidity_val=0.4)
-    return jsonify(score_data)
+@app.route("/indicators")
+def indicators():
+    db = SessionLocal)
+    indicators_list = db.query(MacroIndicator).all()
+    sample_macro_score = calculate_macro_score(inflation_val=0.3, labor_val=0.2, growth_val=0.1, liquidity_val=0.4)
+    db.close()
+    return render_template("indicators.html", indicators=indicators_list, macro_score=sample_macro_score, active_page="indicators")
+
+@app.route("/signals")
+def signals():
+    sample_macro_score = calculate_macro_score(inflation_val=0.3, labor_val=0.2, growth_val=0.1, liquidity_val=0.4)
+    return render_template("signals.html", macro_score=sample_macro_score, active_page="signals")
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)

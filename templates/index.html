@@ -15,30 +15,70 @@
         .navbar { border-bottom: 1px solid #30363d; background-color: #161b22 !important; }
         .nav-link { color: #8b949e !important; }
         .nav-link.active { color: #e1e4e8 !important; font-weight: 600; }
+        .badge-bullish { background-color: rgba(63, 185, 80, 0.15); color: #3fb950; border: 1px solid #3fb950; }
+        .badge-bearish { background-color: rgba(248, 81, 73, 0.15); color: #f85149; border: 1px solid #f85149; }
+        .badge-neutral { background-color: rgba(210, 153, 34, 0.15); color: #d29922; border: 1px solid #d29922; }
     </style>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark px-3 py-3">
         <div class="container-fluid">
-            <a class="navbar-brand fw-bold fs-6" href="#">MACRO TRADE</a>
+            <a class="navbar-brand fw-bold fs-6" href="/">MACRO TRADE</a>
             <span class="badge bg-success ms-2">LIVE</span>
             <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
                 <ul class="navbar-nav mt-2 mt-lg-0">
-                    <li class="nav-item"><a class="nav-link active" href="#">Market Feeds</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Macro Indicators</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Trade Signals</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/">Market Feeds</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/indicators">Macro Indicators</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/signals">Trade Signals</a></li>
                 </ul>
             </div>
         </div>
     </nav>
 
     <div class="container-fluid px-3 my-4">
+        <!-- Transparent Macro Intelligence Scorecard -->
+        <div class="card shadow-sm p-4 mb-4">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                <h5 class="fw-semibold text-light mb-0">Transparent Macro Decision Engine</h5>
+                <span class="badge {{ 'badge-bullish' if macro_score.bias == 'BULLISH' else ('badge-bearish' if macro_score.bias == 'BEARISH' else 'badge-neutral') }} px-3 py-2 fs-6">
+                    Bias: {{ macro_score.bias }} (Score: {{ macro_score.composite_score }})
+                </span>
+            </div>
+            <p class="text-muted small mb-3">Real-time factor decomposition explaining fundamental asset biases.</p>
+            <div class="row g-3">
+                <div class="col-6 col-md-3">
+                    <div class="p-3 bg-dark rounded border border-secondary">
+                        <span class="text-secondary small d-block">Inflation Impact</span>
+                        <strong class="fs-5">{{ macro_score.components.inflation_impact }}%</strong>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="p-3 bg-dark rounded border border-secondary">
+                        <span class="text-secondary small d-block">Labor Market</span>
+                        <strong class="fs-5">{{ macro_score.components.labor_market }}%</strong>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="p-3 bg-dark rounded border border-secondary">
+                        <span class="text-secondary small d-block">Economic Growth</span>
+                        <strong class="fs-5">{{ macro_score.components.economic_growth }}%</strong>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="p-3 bg-dark rounded border border-secondary">
+                        <span class="text-secondary small d-block">Liquidity Conditions</span>
+                        <strong class="fs-5">{{ macro_score.components.liquidity_conditions }}%</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h5 class="fw-semibold text-light mb-0">Real-Time Market Feeds</h5>
-            <span class="text-muted small">Auto-syncing</span>
+            <span class="text-muted small">Auto-syncing every 5m</span>
         </div>
         
         <div class="card shadow-sm">
@@ -60,7 +100,7 @@
                             <td class="text-muted small">{{ q.instrument.name }}</td>
                             <td>{{ "%.4f"|format(q.price) }}</td>
                             <td class="{{ 'positive' if q.change_24h >= 0 else 'negative' }}">
-                                {{ "%+.2f"|format(q.change_24h) }}%
+                                {{ "%+.2f"|format(q.change_24h) %>%
                             </td>
                             <td class="text-muted small">{{ q.updated_at.strftime('%H:%M:%S') }}</td>
                         </tr>
