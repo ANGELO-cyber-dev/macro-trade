@@ -43,7 +43,7 @@ def index():
     try:
         eur_price = get_finnhub_price("OANDA:EUR_USD", "1.1045")
         gbp_price = get_finnhub_price("OANDA:GBP_USD", "1.3120")
-        jpy_price = get_finnhub_price("OANDA:USD_JPY", "146.85")
+        jpy_price = get_finnhub_price("USD_JPY", "146.85")
         chf_price = get_finnhub_price("OANDA:USD_CHF", "0.8850")
         cad_price = get_finnhub_price("OANDA:USD_CAD", "1.3540")
         gold_price = get_finnhub_price("OANDA:XAU_USD", "2,520.40")
@@ -57,6 +57,8 @@ def index():
         {"ticker": "USD/JPY", "name": "USD Dollar / Japanese Yen", "price": jpy_price, "change": "-0.18%"},
         {"ticker": "USD/CHF", "name": "USD Dollar / Swiss Franc", "price": chf_price, "change": "+0.05%"},
         {"ticker": "USD/CAD", "name": "USD Dollar / Canadian Dollar", "price": cad_price, "change": "-0.12%"},
+        {"ticker": "AUD/USD", "name": "Australian Dollar / US Dollar", "price": "0.6720", "change": "+0.31%"},
+        {"ticker": "NZD/USD", "name": "New Zealand Dollar / US Dollar", "price": "0.6150", "change": "+0.19%"},
         {"ticker": "XAU/USD", "name": "Spot Gold", "price": gold_price, "change": "+0.45%"},
         {"ticker": "XAG/USD", "name": "Spot Silver", "price": "29.15", "change": "+0.60%"},
         {"ticker": "BTC/USD", "name": "Bitcoin / US Dollar", "price": btc_price, "change": "+1.25%"},
@@ -81,6 +83,10 @@ def indicators():
 @app.route("/signals")
 def signals():
     complete_signals = [
+        {"type": "LONG SETUP", "badge_class": "success", "pair": "EUR/USD (Euro Major)", "title": "ECB Divergence & Support Test", "desc": "Eurozone trade surplus and resilient services PMI underpin structural bids.", "confidence": "82%", "timeframe": "Intraday"},
+        {"type": "SHORT SETUP", "badge_class": "danger", "pair": "GBP/USD (Cable)", "title": "UK Fiscal Headwinds Resistance", "desc": "Stalling wage growth and softer retail metrics weigh on the Sterling.", "confidence": "79%", "timeframe": "Swing"},
+        {"type": "LONG SETUP", "badge_class": "success", "pair": "USD/JPY (Ninja)", "title": "BoJ Rate Stance Carry Continuation", "desc": "Yield differentials favor long USD carry trades on pullbacks.", "confidence": "85%", "timeframe": "Position"},
+        {"type": "LONG SETUP", "badge_class": "success", "pair": "AUD/USD (Aussie)", "title": "Commodity Super-Cycle Bounce", "desc": "Industrial metal demand recovery supports high-beta Oceania currency.", "confidence": "77%", "timeframe": "Multi-Day"},
         {"type": "LONG SETUP", "badge_class": "success", "pair": "XAU/USD (Gold)", "title": "Gold Safe-Haven Breakout", "desc": "Central bank reserve accumulation and sticky US inflation drive bullion higher.", "confidence": "84%", "timeframe": "Swing"},
         {"type": "LONG SETUP", "badge_class": "success", "pair": "BTC/USD (Crypto)", "title": "Bitcoin Institutional Accumulation", "desc": "Strong ETF net inflows and macro liquidity expansion support bullish continuation.", "confidence": "81%", "timeframe": "Multi-Day"}
     ]
