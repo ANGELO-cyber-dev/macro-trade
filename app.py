@@ -1,12 +1,11 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for
 import os
-import json
-import websocket
+import requests
 
 app = Flask(__name__)
 app.secret_key = "macro_trade_secure_key"
 
-DERIV_APP_ID = os.environ.get("DERIV_APP_ID", "1089")
+FINNHUB_KEY = os.environ.get("FINNHUB_API_KEY", "")
 
 community_posts = [
     {
@@ -24,18 +23,17 @@ community_posts = [
 def calculate_macro_score():
     return 78
 
-def get_deriv_price(symbol, fallback):
+def get_finnhub_price(symbol, fallback):
+    if not FINNHUB_KEY:
+        return fallback
     try:
-        ws_url = f"wss://ws.derivws.com/websockets/v3?app_id={DERIV_APP_ID}"
-        ws = websocket.create_connection(ws_url, timeout=2)
-        request_payload = {"ticks": symbol}
-        ws.send(json.dumps(request_payload))
-        result = ws.recv()
-        data = json.loads(result)
-        ws.close()
-        if "tick" in data:
-            price = data["tick"]["quote"]
-            return f"{price:,.4f}" if price < 10 else f"{price:,.2f}"
+        url = f"https://finnhub.io/api/v1/quote?symbol={symbol}&token={FINNHUB_KEY}"
+        res = requests.get(url, timeout=3)
+        if res.status_code == 200:
+            data = res.json()
+            price = data.get("c")
+            if price and price > 0:
+                return f"{price:,.4f}" if price < 10 else f"{price:,.2f}"
     except Exception:
         pass
     return fallback
@@ -43,20 +41,22 @@ def get_deriv_price(symbol, fallback):
 @app.route("/")
 def index():
     try:
-        eur_price = get_deriv_price("frxEURUSD", "1.1045")
-        gbp_price = get_deriv_price("frxGBPUSD", "1.3120")
-        jpy_price = get_deriv_price("frxUSDJPY", "146.85")
-        btc_price = get_deriv_price("cryBTCUSD", "59,400.00")
-        gold_price = get_deriv_price("frxXAUUSD", "2,520.40")
+        eur_price = get_finnhub_price("OANDA:EUR_USD", "1.1045")
+        gbp_price = get_finnhub_price("OANDA:GBP_USD", "1.3120")
+        jpy_price = get_finnhub_price("OANDA:USD_JPY", "146.85")
+        chf_price = get_finnhub_price("OANDA:USD_CHF", "0.8850")
+        cad_price = get_finnhub_price("OANDA:USD_CAD", "1.3540")
+        gold_price = get_finnhub_price("OANDA:XAU_USD", "2,520.40")
+        btc_price = get_finnhub_price("BINANCE:BTCUSDT", "59,400.00")
     except Exception:
-        eur_price, gbp_price, jpy_price, btc_price, gold_price = "1.1045", "1.3120", "146.85", "59,400.00", "2,520.40"
+        eur_price, gbp_price, jpy_price, chf_price, cad_price, gold_price, btc_price = "1.1045", "1.3120", "146.85", "0.8850", "1.3540", "2,520.40", "59,400.00"
 
     live_assets = [
         {"ticker": "EUR/USD", "name": "Euro / US Dollar", "price": eur_price, "change": "+0.15%"},
         {"ticker": "GBP/USD", "name": "British Pound / US Dollar", "price": gbp_price, "change": "+0.22%"},
         {"ticker": "USD/JPY", "name": "USD Dollar / Japanese Yen", "price": jpy_price, "change": "-0.18%"},
-        {"ticker": "USD/CHF", "name": "USD Dollar / Swiss Franc", "price": "0.8850", "change": "+0.05%"},
-        {"ticker": "USD/CAD", "name": "USD Dollar / Canadian Dollar", "price": "1.3540", "change": "-0.12%"},
+        {"ticker": "USD/CHF", "name": "USD Dollar / Swiss Franc", "price": chf_price, "change": "+0.05%"},
+        {"ticker": "USD/CAD", "name": "USD Dollar / Canadian Dollar", "price": cad_price, "change": "-0.12%"},
         {"ticker": "XAU/USD", "name": "Spot Gold", "price": gold_price, "change": "+0.45%"},
         {"ticker": "XAG/USD", "name": "Spot Silver", "price": "29.15", "change": "+0.60%"},
         {"ticker": "BTC/USD", "name": "Bitcoin / US Dollar", "price": btc_price, "change": "+1.25%"},
@@ -116,8 +116,8 @@ def community():
                     "timestamp": "Just now"
                 })
             return redirect(url_for("community"))
-    except Exception as e:
-        print(f"Community Error: {e}")
+    except Exception:
+        pass
     
     return render_template("community.html", macro_score=calculate_macro_score(), active_page="community", posts=community_posts)
 
