@@ -1,7 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for
 import os
 import requests
-import time
 
 app = Flask(__name__)
 app.secret_key = "macro_trade_secure_key"
@@ -21,67 +20,43 @@ community_posts = [
     }
 ]
 
-# Simple cache to prevent rate-limiting on every single page refresh
-price_cache = {
-    "data": {},
-    "timestamp": 0
-}
-
 def calculate_macro_score():
     return 78
 
-def get_live_prices():
-    global price_cache
-    # Cache prices for 60 seconds to respect Twelve Data's free tier limits
-    if time.time() - price_cache["timestamp"] < 60 and price_cache["data"]:
-        return price_cache["data"]
-
-    symbols = {
-        "EUR/USD": ("Euro / US Dollar", "1.1045", "+0.15%"),
-        "GBP/USD": ("British Pound / US Dollar", "1.3120", "+0.22%"),
-        "USD/JPY": ("USD Dollar / Japanese Yen", "146.85", "-0.18%"),
-        "USD/CHF": ("USD Dollar / Swiss Franc", "0.8850", "+0.05%"),
-        "USD/CAD": ("USD Dollar / Canadian Dollar", "1.3540", "-0.12%"),
-        "AUD/USD": ("Australian Dollar / US Dollar", "0.6720", "+0.31%"),
-        "NZD/USD": ("New Zealand Dollar / US Dollar", "0.6150", "+0.19%"),
-        "XAU/USD": ("Spot Gold", "2,520.40", "+0.45%"),
-        "XAG/USD": ("Spot Silver", "29.15", "+0.60%"),
-        "BTC/USD": ("Bitcoin / US Dollar", "59,400.00", "+1.25%")
-    }
-
-    live_assets = []
-    new_cache = {}
-
-    for ticker, (name, fallback, change) in symbols.items():
-        price_val = fallback
-        try:
-            url = f"https://api.twelvedata.com/price?symbol={ticker}&apikey={TWELVE_KEY}"
-            res = requests.get(url, timeout=2)
-            if res.status_code == 200:
-                data = res.json()
-                if "price" in data:
-                    p = float(data["price"])
-                    price_val = f"{p:,.4f}" if p < 10 else f"{p:,.2f}"
-        except Exception:
-            pass
-        
-        live_assets.append({"ticker": ticker, "name": name, "price": price_val, "change": change})
-        new_cache[ticker] = price_val
-        # Brief pause between requests to stay safe on the free tier rate limit
-        time.sleep(0.2)
-
-    # Add indices with standard representations
-    live_assets.append({"ticker": "US30", "name": "Wall Street 30 Index", "price": "41,150.00", "change": "+0.35%"})
-    live_assets.append({"ticker": "NAS100", "name": "Nasdaq 100 Index", "price": "19,820.00", "change": "+0.78%"})
-
-    price_cache["data"] = live_assets
-    price_cache["timestamp"] = time.time()
-    return live_assets
+def get_twelve_price(symbol, fallback):
+    if not TWELVE_KEY:
+        return fallback
+    try:
+        url = f"https://api.twelvedata.com/price?symbol={symbol}&apikey={TWELVE_KEY}"
+        res = requests.get(url, timeout=1.5)
+        if res.status_code == 200:
+            data = res.json()
+            if "price" in data:
+                p = float(data["price"])
+                return f"{p:,.4f}" if p < 10 else f"{p:,.2f}"
+    except Exception:
+        pass
+    return fallback
 
 @app.route("/")
 def index():
-    assets = get_live_prices()
-    return render_template("index.html", macro_score=calculate_macro_score(), active_page="market", assets=assets)
+    # Fast single-call or light checks with tight timeouts to prevent 502 gateway timeouts
+    live_assets = [
+        {"ticker": "EUR/USD", "name": "Euro / US Dollar", "price": get_twelve_price("EUR/USD", "1.1045"), "change": "+0.15%"},
+        {"ticker": "GBP/USD", "name": "British Pound / US Dollar", "price": get_twelve_price("GBP/USD", "1.3120"), "change": "+0.22%"},
+        {"ticker": "USD/JPY", "name": "USD Dollar / Japanese Yen", "price": get_twelve_price("USD/JPY", "146.85"), "change": "-0.18%"},
+        {"ticker": "USD/CHF", "name": "USD Dollar / Swiss Franc", "price": get_twelve_price("USD/CHF", "0.8850"), "change": "+0.05%"},
+        {"ticker": "USD/CAD", "name": "USD Dollar / Canadian Dollar", "price": get_twelve_price("USD/CAD", "1.3540"), "change": "-0.12%"},
+        {"ticker": "AUD/USD", "name": "Australian Dollar / US Dollar", "price": get_twelve_price("AUD/USD", "0.6720"), "change": "+0.31%"},
+        {"ticker": "NZD/USD", "name": "New Zealand Dollar / US Dollar", "price": get_twelve_price("NZD/USD", "0.6150"), "change": "+0.19%"},
+        {"ticker": "XAU/USD", "name": "Spot Gold", "price": get_twelve_price("XAU/USD", "2,520.40"), "change": "+0.45%"},
+        {"ticker": "XAG/USD", "name": "Spot Silver", "price": get_twelve_price("XAG/USD", "29.15"), "change": "+0.60%"},
+        {"ticker": "BTC/USD", "name": "Bitcoin / US Dollar", "price": get_twelve_price("BTC/USD", "59,400.00"), "change": "+1.25%"},
+        {"ticker": "US30", "name": "Wall Street 30 Index", "price": "41,150.00", "change": "+0.35%"},
+        {"ticker": "NAS100", "name": "Nasdaq 100 Index", "price": "19,820.00", "change": "+0.78%"}
+    ]
+
+    return render_template("index.html", macro_score=calculate_macro_score(), active_page="market", assets=live_assets)
 
 @app.route("/indicators")
 def indicators():
