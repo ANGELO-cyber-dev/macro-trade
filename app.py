@@ -16,7 +16,8 @@ community_posts = [
         "entry": "2510.00",
         "target": "2550.00",
         "content": "Central bank accumulation is driving structural breakouts on the daily timeframe.",
-        "timestamp": "2 hours ago"
+        "timestamp": "2 hours ago",
+        "likes": 14
     }
 ]
 
@@ -33,13 +34,10 @@ def api_prices():
             res = requests.get(url, timeout=3)
             if res.status_code == 200:
                 data = res.json()
-                # Twelve Data returns dictionary mapping or multi-symbol format
                 for sym, details in data.items():
                     if isinstance(details, dict) and "price" in details:
                         val = float(details["price"])
                         prices[sym] = f"{val:,.4f}" if val < 10 else f"{val:,.2f}"
-                    elif sym == "price": # Single fallback format if structure changes
-                        pass
         except Exception:
             pass
     return jsonify(prices)
@@ -113,13 +111,22 @@ def community():
                     "entry": entry,
                     "target": target,
                     "content": content,
-                    "timestamp": "Just now"
+                    "timestamp": "Just now",
+                    "likes": 0
                 })
             return redirect(url_for("community"))
     except Exception:
         pass
     
     return render_template("community.html", macro_score=calculate_macro_score(), active_page="community", posts=community_posts)
+
+@app.route("/api/community/like/<int:post_id>", methods=["POST"])
+def like_post(post_id):
+    for post in community_posts:
+        if post["id"] == post_id:
+            post["likes"] += 1
+            return jsonify({"success": True, "likes": post["likes"]})
+    return jsonify({"success": False}), 404
 
 @app.route("/comn")
 def comn_alias():
