@@ -23,9 +23,29 @@ community_posts = [
 def calculate_macro_score():
     return 78
 
+@app.route("/api/prices")
+def api_prices():
+    symbols = "EUR/USD,GBP/USD,USD/JPY,USD/CHF,USD/CAD,AUD/USD,NZD/USD,XAU/USD,XAG/USD,BTC/USD"
+    prices = {}
+    if TWELVE_KEY:
+        try:
+            url = f"https://api.twelvedata.com/price?symbol={symbols}&apikey={TWELVE_KEY}"
+            res = requests.get(url, timeout=3)
+            if res.status_code == 200:
+                data = res.json()
+                # Twelve Data returns dictionary mapping or multi-symbol format
+                for sym, details in data.items():
+                    if isinstance(details, dict) and "price" in details:
+                        val = float(details["price"])
+                        prices[sym] = f"{val:,.4f}" if val < 10 else f"{val:,.2f}"
+                    elif sym == "price": # Single fallback format if structure changes
+                        pass
+        except Exception:
+            pass
+    return jsonify(prices)
+
 @app.route("/")
 def index():
-    # Base asset list with initial fallbacks
     live_assets = [
         {"ticker": "EUR/USD", "name": "Euro / US Dollar", "price": "1.1045", "change": "+0.15%"},
         {"ticker": "GBP/USD", "name": "British Pound / US Dollar", "price": "1.3120", "change": "+0.22%"},
@@ -40,22 +60,6 @@ def index():
         {"ticker": "US30", "name": "Wall Street 30 Index", "price": "41,150.00", "change": "+0.35%"},
         {"ticker": "NAS100", "name": "Nasdaq 100 Index", "price": "19,820.00", "change": "+0.78%"}
     ]
-
-    # Attempt to fetch a couple of primary live prices directly without blocking the whole page
-    if TWELVE_KEY:
-        try:
-            url = f"https://api.twelvedata.com/price?symbol=EUR/USD,GBP/USD,XAU/USD&apikey={TWELVE_KEY}"
-            res = requests.get(url, timeout=2)
-            if res.status_code == 200:
-                data = res.json()
-                for asset in live_assets:
-                    t = asset["ticker"]
-                    if t in data and "price" in data[t]:
-                        val = float(data[t]["price"])
-                        asset["price"] = f"{val:,.4f}" if val < 10 else f"{val:,.2f}"
-        except Exception:
-            pass
-
     return render_template("index.html", macro_score=calculate_macro_score(), active_page="market", assets=live_assets)
 
 @app.route("/indicators")
