@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 import os
 import requests
 
@@ -23,38 +23,38 @@ community_posts = [
 def calculate_macro_score():
     return 78
 
-def get_twelve_price(symbol, fallback):
-    if not TWELVE_KEY:
-        return fallback
-    try:
-        url = f"https://api.twelvedata.com/price?symbol={symbol}&apikey={TWELVE_KEY}"
-        res = requests.get(url, timeout=1.5)
-        if res.status_code == 200:
-            data = res.json()
-            if "price" in data:
-                p = float(data["price"])
-                return f"{p:,.4f}" if p < 10 else f"{p:,.2f}"
-    except Exception:
-        pass
-    return fallback
-
 @app.route("/")
 def index():
-    # Fast single-call or light checks with tight timeouts to prevent 502 gateway timeouts
+    # Base asset list with initial fallbacks
     live_assets = [
-        {"ticker": "EUR/USD", "name": "Euro / US Dollar", "price": get_twelve_price("EUR/USD", "1.1045"), "change": "+0.15%"},
-        {"ticker": "GBP/USD", "name": "British Pound / US Dollar", "price": get_twelve_price("GBP/USD", "1.3120"), "change": "+0.22%"},
-        {"ticker": "USD/JPY", "name": "USD Dollar / Japanese Yen", "price": get_twelve_price("USD/JPY", "146.85"), "change": "-0.18%"},
-        {"ticker": "USD/CHF", "name": "USD Dollar / Swiss Franc", "price": get_twelve_price("USD/CHF", "0.8850"), "change": "+0.05%"},
-        {"ticker": "USD/CAD", "name": "USD Dollar / Canadian Dollar", "price": get_twelve_price("USD/CAD", "1.3540"), "change": "-0.12%"},
-        {"ticker": "AUD/USD", "name": "Australian Dollar / US Dollar", "price": get_twelve_price("AUD/USD", "0.6720"), "change": "+0.31%"},
-        {"ticker": "NZD/USD", "name": "New Zealand Dollar / US Dollar", "price": get_twelve_price("NZD/USD", "0.6150"), "change": "+0.19%"},
-        {"ticker": "XAU/USD", "name": "Spot Gold", "price": get_twelve_price("XAU/USD", "2,520.40"), "change": "+0.45%"},
-        {"ticker": "XAG/USD", "name": "Spot Silver", "price": get_twelve_price("XAG/USD", "29.15"), "change": "+0.60%"},
-        {"ticker": "BTC/USD", "name": "Bitcoin / US Dollar", "price": get_twelve_price("BTC/USD", "59,400.00"), "change": "+1.25%"},
+        {"ticker": "EUR/USD", "name": "Euro / US Dollar", "price": "1.1045", "change": "+0.15%"},
+        {"ticker": "GBP/USD", "name": "British Pound / US Dollar", "price": "1.3120", "change": "+0.22%"},
+        {"ticker": "USD/JPY", "name": "USD Dollar / Japanese Yen", "price": "146.85", "change": "-0.18%"},
+        {"ticker": "USD/CHF", "name": "USD Dollar / Swiss Franc", "price": "0.8850", "change": "+0.05%"},
+        {"ticker": "USD/CAD", "name": "USD Dollar / Canadian Dollar", "price": "1.3540", "change": "-0.12%"},
+        {"ticker": "AUD/USD", "name": "Australian Dollar / US Dollar", "price": "0.6720", "change": "+0.31%"},
+        {"ticker": "NZD/USD", "name": "New Zealand Dollar / US Dollar", "price": "0.6150", "change": "+0.19%"},
+        {"ticker": "XAU/USD", "name": "Spot Gold", "price": "2,520.40", "change": "+0.45%"},
+        {"ticker": "XAG/USD", "name": "Spot Silver", "price": "29.15", "change": "+0.60%"},
+        {"ticker": "BTC/USD", "name": "Bitcoin / US Dollar", "price": "59,400.00", "change": "+1.25%"},
         {"ticker": "US30", "name": "Wall Street 30 Index", "price": "41,150.00", "change": "+0.35%"},
         {"ticker": "NAS100", "name": "Nasdaq 100 Index", "price": "19,820.00", "change": "+0.78%"}
     ]
+
+    # Attempt to fetch a couple of primary live prices directly without blocking the whole page
+    if TWELVE_KEY:
+        try:
+            url = f"https://api.twelvedata.com/price?symbol=EUR/USD,GBP/USD,XAU/USD&apikey={TWELVE_KEY}"
+            res = requests.get(url, timeout=2)
+            if res.status_code == 200:
+                data = res.json()
+                for asset in live_assets:
+                    t = asset["ticker"]
+                    if t in data and "price" in data[t]:
+                        val = float(data[t]["price"])
+                        asset["price"] = f"{val:,.4f}" if val < 10 else f"{val:,.2f}"
+        except Exception:
+            pass
 
     return render_template("index.html", macro_score=calculate_macro_score(), active_page="market", assets=live_assets)
 
