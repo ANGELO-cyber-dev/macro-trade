@@ -3,91 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Global Market Terminal | MacroTrade</title>
+    <title>MacroTrade by ANGELOFX</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { background-color: #0b0f19; color: #ffffff; font-family: system-ui, -apple-system, sans-serif; overflow-x: hidden; }
-        .sidebar { width: 240px; height: 100vh; position: fixed; top: 0; left: 0; background: #111827; border-right: 1px solid #1f2937; padding: 20px; z-index: 1000; transition: transform 0.3s ease; }
-        .main-content { margin-left: 240px; padding: 25px; }
-        .nav-link { color: #ffffff; border-radius: 8px; margin-bottom: 5px; font-weight: 500; }
-        .nav-link:hover, .nav-link.active { color: #ffffff; background: #1f2937; }
-        .card-custom { background: #111827; border: 1px solid #1f2937; border-radius: 12px; padding: 20px; color: #ffffff; margin-bottom: 20px; }
-        .table { color: #ffffff; border-color: #1f2937; }
-        .table th { background-color: #161e2e; color: #9ca3af; border-bottom: 1px solid #374151; font-weight: 600; }
-        .table td { background-color: #111827; color: #ffffff; border-bottom: 1px solid #1f2937; vertical-align: middle; }
-        .text-white-50 { color: #d1d5db !important; }
-        .mobile-header { display: none; background: #111827; border-bottom: 1px solid #1f2937; padding: 15px 20px; position: sticky; top: 0; z-index: 999; }
-        @media (max-width: 768px) {
-            .sidebar { transform: translateX(-100%); }
-            .sidebar.mobile-open { transform: translateX(0); }
-            .main-content { margin-left: 0; padding: 15px; }
-            .mobile-header { display: flex; justify-content: space-between; align-items: center; }
-        }
+        body { background-color: #0b0e14; color: #e1e4e8; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        .navbar { background-color: #121820; border-bottom: 1px solid #21262d; }
+        .card { background-color: #161b22; border: 1px solid #30363d; border-radius: 10px; }
+        .table { color: #e1e4e8; }
+        .table-dark { background-color: #161b22; }
+        .badge-pulse { animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
-    <div class="mobile-header">
-        <div class="d-flex flex-column">
-            <h4 class="text-white fw-bold mb-0"><i class="fa-solid fa-chart-line text-primary me-2"></i>MacroTrade</h4>
-            <small class="text-white-50" style="font-size: 0.65rem; letter-spacing: 1px;">by ANGELOFX</small>
+    <nav class="navbar navbar-expand-lg navbar-dark px-4">
+        <a class="navbar-brand fw-bold d-flex align-items-center" href="/">
+            <i class="fa-solid fa-chart-line text-primary me-2"></i> MacroTrade
+            <span class="text-muted fs-6 ms-2 font-monospace">by ANGELOFX</span>
+        </a>
+        <div class="ms-auto d-flex align-items-center">
+            <span class="badge bg-success badge-pulse me-3">LIVE STREAM</span>
+            <span class="text-muted small">Macro Score: <strong class="text-light">{{ macro_score }}/100</strong></span>
         </div>
-        <button class="btn btn-dark border-secondary text-white" onclick="toggleMenu()"><i class="fa-solid fa-bars"></i> Menu</button>
-    </div>
+    </nav>
 
-    <div class="sidebar d-flex flex-column" id="appSidebar">
-        <div class="mb-4 d-flex justify-content-between align-items-center">
-            <div>
-                <h4 class="text-white fw-bold mb-0"><i class="fa-solid fa-chart-line text-primary me-2"></i>MacroTrade</h4>
-                <small class="text-white-50" style="font-size: 0.7rem; letter-spacing: 1px;">by ANGELOFX</small>
-            </div>
-            <button class="btn btn-sm btn-dark text-white d-md-none" onclick="toggleMenu()"><i class="fa-solid fa-xmark"></i></button>
-        </div>
-        <ul class="nav flex-column flex-grow-1">
-            <li class="nav-item"><a class="nav-link {% if active_page == 'market' %}active{% endif %}" href="/"><i class="fa-solid fa-globe me-2"></i>Market Dashboard</a></li>
-            <li class="nav-item"><a class="nav-link {% if active_page == 'indicators' %}active{% endif %}" href="/indicators"><i class="fa-solid fa-chart-bar me-2"></i>Macro Indicators</a></li>
-            <li class="nav-item"><a class="nav-link {% if active_page == 'signals' %}active{% endif %}" href="/signals"><i class="fa-solid fa-bolt me-2"></i>Trading Signals</a></li>
-            <li class="nav-item"><a class="nav-link {% if active_page == 'sizer' %}active{% endif %}" href="/sizer"><i class="fa-solid fa-calculator me-2"></i>Position Sizer</a></li>
-            <li class="nav-item"><a class="nav-link {% if active_page == 'tracker' %}active{% endif %}" href="/tracker"><i class="fa-solid fa-chart-pie me-2"></i>MT5 Tracker</a></li>
-            <li class="nav-item"><a class="nav-link {% if active_page == 'community' %}active{% endif %}" href="/community"><i class="fa-solid fa-comments me-2"></i>Community Setups</a></li>
-        </ul>
-        <div class="p-3 bg-dark rounded-3 border border-secondary mt-2 mb-2">
-            <span class="text-white-50 d-block small">Founder & Architect</span>
-            <span class="fs-6 fw-bold text-primary">ANGELOFX</span>
-        </div>
-        <div class="p-3 bg-dark rounded-3 border border-secondary">
-            <span class="text-white-50 d-block small">Macro Regime Score</span>
-            <span class="fs-4 fw-bold text-success">{{ macro_score }} / 100</span>
-        </div>
-    </div>
-
-    <div class="main-content">
-        <div class="mb-4">
-            <h2 class="fw-bold text-white mb-1">Global Market Terminal</h2>
-            <p class="text-white-50 mb-0">Live institutional quotes and macroeconomic telemetry.</p>
-        </div>
-
-        <div class="card-custom p-0 overflow-hidden mb-4">
-            <div class="p-3 border-bottom border-secondary bg-dark">
-                <h5 class="fw-bold mb-0 text-white"><i class="fa-solid fa-wave-square text-primary me-2"></i>Asset Pricing Feed</h5>
+    <div class="container py-4">
+        <div class="card p-3 shadow-sm mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="m-0 fw-bold">Live Institutional Market Feeds</h5>
+                <small class="text-muted"><i class="fa-solid fa-rotate fa-spin text-primary me-1"></i> Auto-streaming active</small>
             </div>
             <div class="table-responsive">
-                <table class="table mb-0">
+                <table class="table table-dark table-hover align-middle mb-0">
                     <thead>
                         <tr>
-                            <th class="ps-4">Ticker</th>
+                            <th>Ticker</th>
                             <th>Asset Name</th>
                             <th>Price</th>
-                            <th class="pe-4">24h Change</th>
+                            <th>24h Change</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for asset in assets %}
                         <tr>
-                            <td class="ps-4 fw-bold text-primary">{{ asset.ticker }}</td>
-                            <td class="text-white">{{ asset.name }}</td>
-                            <td class="fw-semibold text-white">{{ asset.price }}</td>
-                            <td class="pe-4 {% if '+' in asset.change %}text-success{% else %}text-danger{% endif %} fw-bold">{{ asset.change }}</td>
+                            <td class="fw-bold text-primary">{{ asset.ticker }}</td>
+                            <td class="text-muted small">{{ asset.name }}</td>
+                            <td><span class="fw-bold price-val" data-ticker="{{ asset.ticker }}">{{ asset.price }}</span></td>
+                            <td><span class="text-success small">{{ asset.change }}</span></td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -95,16 +58,33 @@
             </div>
         </div>
 
-        <div class="card-custom">
-            <h5 class="fw-bold mb-2 text-white"><i class="fa-solid fa-newspaper text-primary me-2"></i>Live Market News</h5>
-            <p class="text-white-50 small mb-0">Central bank liquidity injections and global trade balance metrics remain the primary drivers across major asset classes this session.</p>
+        <div class="card p-4 shadow-sm">
+            <h5 class="fw-bold mb-3"><i class="fa-solid fa-newspaper text-primary me-2"></i>Live Market News</h5>
+            <p class="text-muted mb-0">Central bank liquidity injections and global trade balance metrics remain the primary drivers across major asset classes this session.</p>
         </div>
     </div>
 
     <script>
-        function toggleMenu() {
-            document.getElementById('appSidebar').classList.toggle('mobile-open');
+        // Real-time price streaming loop
+        async function streamPrices() {
+            try {
+                let res = await fetch('/api/prices');
+                if (res.ok) {
+                    let data = await res.json();
+                    document.querySelectorAll('.price-val').forEach(el => {
+                        let ticker = el.getAttribute('data-ticker');
+                        if (data[ticker]) {
+                            el.textContent = data[ticker];
+                        }
+                    });
+                }
+            } catch (err) {
+                console.error("Stream error:", err);
+            }
         }
+
+        // Poll every 5 seconds for smooth live streaming
+        setInterval(streamPrices, 5000);
     </script>
 </body>
 </html>
